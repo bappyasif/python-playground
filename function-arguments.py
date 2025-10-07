@@ -407,6 +407,11 @@ tables = {
       'drinks': 'Orange Juice, Apple Juice',
       'food_items': 'Pancakes',
       'total': [534.50, 20.0, 5]
+    },
+    'is_reserved': {
+      'reserved_by': 'Manager',
+      'date': '2023-01-01',
+      'time': '7:00 PM',
     }
   },
   2: {},
@@ -444,3 +449,54 @@ def calculate_price_per_person(total, tip, split):
   total_tip = total * (tip/100)
   split_price = (total + total_tip) / split
   return split_price
+
+# add items to food_items
+def adjust_food_items(table_number, **order_items):
+    foods = order_items.get('food')
+    # tables[table_number]['order']['food_items'].append(foods)
+    # print(tables[table_number]['order'], "food_items:", tables[table_number]['order']['food_items'], foods, "checks")
+    tables[table_number]['order']['food_items'] = tables[table_number]['order']['food_items'] + ", " + foods
+
+def adjust_drinks(table_number, replace=False, **drink_items):
+   drinks = drink_items.get('drinks')
+   if replace:
+      tables[table_number]['order']['drinks'] = drinks
+   else: 
+      tables[table_number]['order']['drinks'] = tables[table_number]['order']['drinks'] + ", " + drinks
+
+
+adjust_food_items(1, food='Waffles') # added food item to existing food items
+print(tables)
+adjust_drinks(1, replace=True, drinks='Coffee') # included replace parameter to replace existing drinks if set to True
+print(tables)
+
+# reserving tables for customers
+def reserve_table(table_number, reserved_by, date, time):
+   tables[table_number]['is_reserved'] = {
+      'reserved_by': reserved_by,
+      'date': date,
+      'time': time
+   }
+
+reserve_table(1, 'Asst. Manager', '2023-01-01', '7:00 PM')
+print(tables)
+
+# exercises
+def unite_args(*args):
+    result = ""
+    for arg in args:
+        result += arg
+    print(result)
+   
+unite_args("This ", "is ", "a ", "test.") # This is a test.
+
+def item_summer(*args):
+    cur_sum = 0
+    for arg in args:
+       cur_sum += arg
+    
+    return cur_sum
+
+my_list = [1, 2, 3, 4, 5]
+print(item_summer(*my_list)) # 15
+print(item_summer(1, 2, 3, 4, 5)) # 15
