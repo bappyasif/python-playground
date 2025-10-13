@@ -1,117 +1,85 @@
-<!-- python gotcha: Mutable default arguments -->
+# why object oriented programming?
 
-# A python gotcha:
-## when writing a functionwith default arguments, it can sometimes be tempting top include an empty list as default argument to that function
+## features of object orientation
 
-> for instance lets suppose, we were building an application for a school. we want to have a function that can generate new students and return a dictionary of students name, age and grades. since most students enter schools without anjy grades so we can assume to store an empty lists for that.
+> what each program has
 
-```python
-def createStudent(name, age, grades=[]):
-    return {"name": name, "age": age, "grades": grades}
+it has data and behavior, where data is what program knows such as (is it complete? task description for a todo list app) and behavior is what a program can do for instace it can toggle a task complete or incomplete for a todo list app
 
-# lets create two students
-chris = createStudent("chris", 20, 15)
-bree = createStudent("bree", 19)
-print(chris, bree)
+## programming paradigms
+* procedural
+* object oriented
+* functional
+<!-- * declarative -->
 
-# for adding a grade
-def addGrade(student, grade):
-    student["grades"].append(grade)
-    print(student, student["grades"])
+### procedural programming:
+both data and behavior is spread out in same set of step by step instructions
 
-    return student
+we manipulate data directly with behavior onto program set and thus changing overal state of our program
 
-addGrade(chris, 100)
-addGrade(bree, 90)
+order of our code matters very much and our data is mutated directly as program carries out its behavior
 
-# expected output for addGrade
-[100]
-[90]
+### functional programming:
+data and behavior is kept separate
+
+if we want to change or mutate our data directly, we would abstract that with a corresponding behavior which would take new data into consideration and update data in program
+
+we never mutatae data directly but rather through an abstracted pure functions to update a new copy of updated data
+
+### object oriented programming:
+data and behavior are groupped together as objects
+
+object is a special entities in our program, which will have all data, attributes or method or behaviors into an easy to use container
+
+for instance we would have one method for adding and another for toggle tast status and among others
+
+#### four pillars of object orientation
+* encapsulation
+* abstraction
+* inheritance
+* polymorphism
+
+#### encapsulation
+groupping of data and behaviors into an object
+
+for instance we would create a Task class with task data and its behaviors. 
+
+every instantiations of that class for tasks would have those data and behavior groupped together for them to access and modify
+
+it also limits data scope so that it cant interfere with other containers
+
+it bundles data and behavior together that should be together and realted to each other
+
+#### abstraction
+ability to hide its copmplex logic from user, making coee easier to use in otehr places
+
+for instance when you write up and send an email to people, you simple open up your email client and write and then send, without having to know what goes on underneath to make it happen
+
+for our Task app examples, we are totally abstracting its behavior of how its actually toggling it by that toggle method and simply get data state with its isComplete data
+
+#### inheritence
+allows a class to have all data and functionalities of another class
+
+which allows us to share code between multiple classes
+
+reduces code duplications in codebase
+
+for instance, lets say we have another TaskWithDeadline class wich has all data and behaviors of Task class but with deadline, so we can let out Deadline Task class inherits data and behavior from our Task class without have to rewriet any of that Task related code for TaskWithDeadline class
+
+#### polymorphism
+polymorphism likterally means having multiple forms
+
+when we are using inhertence in our classes we can make use of polymorphism
+
+we have to look at those instantiated objects from Task and DeadlineTask classes interms of their data types
+
+>> when we are creating a class we are actually creating a data type
+
+for instamnce from our Task we created object which would have accessed to its data and behavior with Task data type, whereas DeadlineTask would have accessed to its data and behavior with DeadlineTask data type
+
+DeadlineTask would have all data and behavior of Task class as its being inherited by deadline class along with out data and methods related to deadline task type
+
+in a nuttshell any methods that is accessible by task data types objects are also accessible form another data types objects its  an example of polymorphism
 
 
-# actual output
-[100]
-[100, 90]
-
-```
-that doesnt look right, whyt does bree has 100 grade of chris into hers?
-
->> which is know as gotcha, a counterintuitive feature of a programing language taht often leads to mistakes in programs.
-
-```python
-def update_order(new_item, current_order=[]):
-    current_order.append(new_item)
-    return current_order
-# first order, burger
-order1 = update_order({'item': 'burger', 'cost': '3.50'})
-# second order, pasta
-order2 = update_order({'item': 'pasta', 'cost': '8.00'})
-
-# whats in that second order again?
-print(order2) # [{'item': 'burger', 'cost': '3.50'}, {'item': 'pasta', 'cost': '8.00'}] and not just pasta, its both burger and pasta.
-```
-
-# Mutables and Functions
-> to understand this gotcha we must first establish what python classifies as mutable.
-
-a mutable object refers to various containers in python that are intended to be modified. a list for example is a mutable object with its append, remove operations. sets and dictionaries are also mutable.
-
-some of objects are not mutables in python and are therefore OK to be used as default arguments. int, float and other numbers cant be mutated(arithmatic operations will return a new number).
-
-tuples are a kind of immutable list, and strings are also immutable since operations that update a string will all return a completely new string.
-
-> when using a mutable object in function arguments, its important to note: deault parameters values are evaluated from left to right, when function is defined and that same "pre computed" value is used for each call
-
-this means when we call a function, default values we provide for parameters are created only once, and used for each subsequent calls of that function.
-
-which means our `grades=[]` from our earlier example was only created once and anytime we tried to access it, that same list was being modified.
-
-we can even see that memory id of grades for each student is also same using builtin in id() function, confirming our above finding.
-
-```python
-print(id(chris["grades"]))
-print(id(bree["grades"]))
-
-# expected output
-# some memory id that are same for chris and bree both
-```
-
-while this may seem like a headscratcher for many, tehre is a walkaround this gotcha if we ever do want to use mutable default argument. we use keyword `None` to get around this gotcha.
-
-# None workaround
-if we want an empty list as a potential default argument value, we can use `None` as a special value to indicate we did not recieve anything.
-
-after we check whether an argument was provided we can instantiate a new list if it wasnt earlier.
-
-```python
-def createStudent(name, age, grades=None):
-    if grades is None:
-        grades = []
-    return {"name": name, "age": age, "grades": grades}
-
-def addGrade(student, grade)
-    student["grades"].append(grade)
-    return student
-
-# lets create two students
-tom = createStudent("tom", 20)
-sue = createStudent("sue", 19)
-print(tom, sue)
-
-addGrade(tom, 100)
-addGrade(sue, 90)
-
-print(id(tom["grades"]))
-print(id(sue["grades"]))
-
-# expected output
-[100]
-[90]
-
-# actual output
-[100]
-[90]
-```
-
-> While it may seem more cumbersome to write the `if` clause, this is one of the most common (and flexible) ways to avoid running into issues with mutable default arguments.
-
+## comparisons with other programming paradigms
