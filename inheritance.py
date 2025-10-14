@@ -168,3 +168,214 @@ e3 = Admin()
 e1.say_id()
 e2.say_id()
 e3.say_id()
+
+# exercise
+class Student:
+    id_num = 1
+
+    def __init__(self, name, prog):
+        self.id = Student.id_num
+        self.name = name
+        self.prog = prog
+        Student.id_num += 1
+    
+    def identify_student(self):
+        print("Student bearing id: {} know as {} from {} program".format(self.id, self.name, self.prog))
+
+s = Student("John", "Computer Science")
+s.identify_student()
+
+class Undergrad(Student):
+    def __init__(self, name, prog, session):
+        super().__init__(name, prog)
+        self.session = session
+    
+    # def identify_student(self): super().identify_student() # without it we would have same result due to inheritance
+
+    def identify_me(self):
+        # super().identify_student()
+        print("I am in session {}".format(self.session))
+
+
+u = Undergrad("<John 2>", "Computer Science", "2020/2021")
+u.identify_me()
+u.identify_student()
+
+class Postgrad(Student):
+    def __init__(self, name, prog, session):
+        super().__init__(name, prog)
+        self.session = session
+    
+    # def identify_student(self): super().identify_student()
+    def identify_me(self):
+        print("im a postgrad student")
+        print("I am in session {}".format(self.session))
+
+
+p = Postgrad("<John 3>", "Computer Science", "2020/2021")
+p.identify_me()
+p.identify_student()
+
+# multiple inheritance: part - 1
+# a subclass can inherit from multiple superclasses
+# one form of multiple inheritance is when there are multiple levels of inheritance (i.e. A => B => C)
+# which means C is a subclass of B which is a subclass of A, so instance of C will have access to all attributes and methods of A, B and C
+class Animal:
+  def __init__(self, name):
+    self.name = name
+ 
+  def say_hi(self):
+    print("{} says, Hi!".format(self.name))
+
+class Cat(Animal):
+  pass
+
+class Angry_Cat(Cat):
+  pass
+
+my_pet = Angry_Cat("Mr. Cranky")
+my_pet.say_hi() # Mr. Cranky says, Hi!
+
+# observations:
+# above we have three classes, Animal, Cat and Angry_Cat
+# Angry_Cat is a subclass of Cat which is a subclass of Animal
+# when creating instance of Angry_Cat we can access all attributes and methods of Animal, Cat and Angry_Cat
+
+# exercise:
+class Employee:
+    new_id = 1
+
+    def __init__(self):
+        self.id = Employee.new_id
+        Employee.new_id += 1
+    
+    def say_id(self):
+        print(f"My id is {self.id}")
+
+class Admin(Employee):
+    def say_id(self):
+        super().say_id()
+        print("I am an admin")
+
+class Manager(Admin):
+    def say_id(self):
+        super().say_id()
+        print("I am a manager")
+
+
+e = Manager()
+e.say_id()
+
+# multiple inheritance: part - 2
+# another form of multiple inheritance is when there are multiple superclasses for a subclass (i.e. A => (B, C))
+# which means, subclass A has inherited from both B and C, so instance of A will have access to all attributes and methods of B and C
+
+class Animal:
+  def __init__(self, name):
+    self.name = name
+ 
+class Dog(Animal):
+    def action(self):
+        print("{} wigs tail".format(self.name))
+
+class Wolf(Animal):
+    def action(self):
+        print("{} bites".format(self.name))
+
+class Hybrid(Dog, Wolf):
+    # def __init__(self, name):
+    #     super().__init__(name)
+    
+    def action(self):
+        super().action()
+        # print("{} howls".format(self.name))
+        Wolf.action(self)
+        # Dog.action(self) # repeat of line 290
+        print("{} howls".format(self.name))
+
+h = Hybrid("Wolfy")
+h.action() # Wolfy wigs tail \n Wolfy howls
+
+# observations:
+# above we have three classes, Animal, Dog and Wolf
+# Hybrid is a subclass of Dog and Wolf
+# when creating instance of Hybrid we can access all attributes and methods of Dog and Wolf
+# whereas both Dog and Wolf class cant access attribites and methods of each other
+
+# this form of multiple inheritance can be used by adding functionality from a class that does not fit in with current design scheme of current classes
+
+# care must be taken when creating an inheritance structure like this, specially wghen using super() method. in above example super().action() inside hybrid class invokes .action() method of Dog class. this is due to being listed first in inheritance structure, as in listed before Wolf in Hybrid(Dog, Wolf) definition
+
+# Wolf.action(self), calls Wolf class action method itself, here self is passed as arguments to Wolf.action(self) so that it recieves Hybrid class instance to output correct name
+
+# exercise
+class Employee:
+    new_id = 1
+
+    def __init__(self):
+        self.id = Employee.new_id
+        Employee.new_id += 1
+
+    def say_id(self):
+        print(f"My id is {self.id}")
+
+class User:
+    def __init__(self, username, role="customer"):
+        self.username = username
+        self.role = role
+
+    def say_user_info(self):
+        print(f"Username: {self.username}")
+        print("Role: {}".format(self.role))
+
+
+class Admin(Employee, User):
+    def __init__(self):
+        super().__init__()
+        User.__init__(self, self.id, "admin")
+
+    def say_id(self):
+        super().say_id()
+        print("I am an admin")
+
+e = Admin()
+e.say_id()
+e.say_user_info()
+
+# observations:
+# above we have three classes, Employee, User and Admin
+# Admin is a subclass of Employee and User
+# when creating instance of Admin we can access all attributes and methods of Employee and User
+
+# exercise
+class Object:
+    roll = 1
+
+    def __init__(self):
+        self.id = Object.roll
+        Object.roll += 1
+
+    def say_id(self):
+        print(f"Object number: {self.id}")
+
+class Circle():
+    def __init__(self, rad):
+        self.rad = rad
+
+    def area(self):
+        return 3.14 * self.rad ** 2
+
+class DrawCircle(Object, Circle):
+    def __init__(self, rad):
+        Object.__init__(self)
+        Circle.__init__(self, rad)
+
+
+dc = DrawCircle(10)
+dc.say_id()
+print(dc.area()) # 314.0
+
+# observations:
+# above we have three classes, Object, Circle and DrawCircle
+# DrawCircle is a subclass of Object and Circle
+# when creating instance of DrawCircle we can access all attributes and methods of Object and Circle
