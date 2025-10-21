@@ -72,4 +72,149 @@ def print_instrument_price(instrument):
 
 print_instrument_price('Marimba')
 print_instrument_price('Flute')
-print_instrument_price('Piano')
+# print_instrument_price('Piano')
+
+
+# try / except
+# so far exceptions we've encountered caused our programs to stop executing. however its possible for programs to continue executing even after encountering an exception. this is known as exceptions handling and is accomplished using python try / except block
+
+# start => Execute try calause code
+# except => Execute except clause code
+# else => Execute else clause code
+# finally => Execute finally clause code
+# end => Execute end clause code
+
+# python will first attempt to execute code inside try clause code block
+# if no exception is encountered in code, exception clause is skipped and program execution continues to next execution block
+
+# if an exception does occur inside of try block, python will immediately execute the code in the except block, sometimes called a catch block or a handler
+
+# finally block is executed whether or not an exception is encountered
+
+colors = {
+    'red': '#FF0000',
+    'blue': '#0000FF',
+    'yellow': '#FFFF00',
+}
+
+for color in ('red', 'green', 'yellow'):
+  try:
+    print('The hex value of ' + color + ' is ' + colors[color])
+  except:
+    print('An exception occurred! Color does not exist.')
+  print('Loop continues...')
+
+# colors = ["red", "blue", "yellow"]
+for color in colors:
+  try:
+    print("Hex value: " + colors[color])
+  except:
+    print("An exception occurred! Color does not exist.")
+  print("Loop continues...")
+
+# observations:
+# in above code try block runs until it hit an exception
+# when exception is hit, code in except block is executed
+# however exceptions was handled so python continues to next execution block
+
+# exceptions handling is a powerful tool that lets us gain more flexibility in dealing with errors in our applications
+# we can use it multiple times to handle different types of errors or until it 
+
+# excercise:
+staff = {
+  'Austin': {
+      'floor managers': 1,
+      'sales associates': 5
+  },
+  'Melbourne': {
+      'floor managers': 0,
+      'sales associates': 8
+  },
+  'Beijing': {
+      'floor managers': 2,
+      'sales associates': 5
+  },
+}
+
+def print_staff_report(location, staff_dict):
+  managers = staff_dict['floor managers']
+  sales_people = staff_dict['sales associates']
+  ratio = sales_people / managers
+  print('Instrument World ' + location + ' has:')
+  print(str(sales_people) + ' sales employees')
+  print(str(managers) + ' floor managers')
+  print('The ratio of sales people to managers is ' + str(ratio))
+  print()
+
+for location, staff in staff.items():
+  # Write your code below:
+  try:
+    print_staff_report(location, staff)
+  except:
+    print(f"An exception occurred! Location: {location} does not exist.")
+  # print_staff_report(location, staff)
+
+
+# catching specific exceptions:
+# exception handlers from previous exercise handled any exception hit during try clause
+# however in most cases we will have an idea exception that we want to handle specifically within our program
+# it is generally a good idea to use specific exception handlers for specific exceptions
+# we can achieve this by using except keyword followed by exception class name
+
+try:
+  print(1 / 0)
+except ZeroDivisionError:
+  print('Cannot divide by zero!')
+
+# observations:
+# in above code we are catching ZeroDivisionError exception and printing custom message
+
+try:
+  print(undefined_variable)
+except NameError:
+  print('Variable does not exist!')
+
+# observations:
+# in above code we are catching NameError exception and printing custom message
+
+# when we specify exception class name, python will only execute code in except block if an exception of that type is encountered, python allows us to use AS keyword to assign the exception object to a variable
+
+try:
+  print(unknown_variable)
+except NameError as err:
+  print('Variable does not exist!')
+  print(err, "!!")
+
+# exercise
+staff = {
+  'Austin': {
+    'floor managers': 1,
+    'sales associates': 5
+  },
+  'Melbourne': {
+    'floor managers': 0,
+    'sales associates': 8
+  },
+  'Beijing': {
+    'floor managers': 2,
+    'sales associates': 5
+  },
+}
+
+def print_staff_report(location, staff_dict):
+  managers = staff_dict['floor managers']
+  sales_people = staff_dict['sales associates']
+  ratio = sales_people / managers
+  print('Instrument World ' + location + ' has:')
+  print(str(sales_people) + ' sales employees')
+  print(str(managers) + ' floor managers')
+  print('The ratio of sales people to managers is ' + str(ratio))
+  print()
+
+for location, staff in staff.items():
+  try:
+      print_staff_report(location, staff)
+  # Write your code below:
+  except ZeroDivisionError as e:
+      print('Could not print sales report for ' + location)
+      print(e)
