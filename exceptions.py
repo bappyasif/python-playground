@@ -218,3 +218,205 @@ for location, staff in staff.items():
   except ZeroDivisionError as e:
       print('Could not print sales report for ' + location)
       print(e)
+
+
+# multiple exceptions:
+# whiel handling a single exception is useful, python also allows us to handle multiple exceptions at once.
+# we can list more than one exception class name in except clause, python will execute code in except block if an exception of any of the listed exception classes is encountered
+
+try:
+  print(undefined_variable)
+  print(1 / 0)
+except (NameError, ZeroDivisionError):
+  print('An exception occurred!')
+
+# observations:
+# in above code we are catching NameError and ZeroDivisionError exceptions and printing custom message
+# in above code we expect to encounter either NameError or ZeroDivisionError exception, we can list any muber of exceptions class as long as it make sense for try block
+# this is where we can use 'as' clause since it allows us print or operate on specific exception that is caught
+# in addition to catching multiple exceptions, we can also pair multiple 'except' clauses witha single 'try' clause, enabling us to handle specific exceptions in different ways
+
+try:
+  print(1/0, undefined_variable)
+  print(1 / 0)
+except NameError:
+  print('NameError occurred!')
+except ZeroDivisionError:
+  print('ZeroDivisionError occurred!')
+except TypeError:
+  print('TypeError occurred!')
+except Exception:
+  print('An exception occurred! we hit an exception that is not name or zero division error or type error')
+
+# observations:
+# in above code will trigger exception that is not name or zero division error or type error, if not handled by those exception handlers, it will trigger a generic exception
+# python will execute first one of the exception handlers that matches the exception that is encountered
+# in this case and a valid startegy for exception handling, we use last 'except' as a generic exception handler if no other exception handlers match the exception that is encountered
+
+# excercise:
+instrument_prices = {
+  'Banjo': 200,
+  'Cello': 1000,
+  'Flute': 100,
+}
+
+def display_discounted_price(instrument, discount):
+  full_price = instrument_prices[instrument]
+  discount_percentage = discount / 100
+  discounted_price = full_price - (full_price * discount_percentage)
+  print("The instrument's discounted price is: " + str(discounted_price))
+
+instrument = 'Clarinet'
+discount = '20'
+
+# Write your code below:
+try:
+  display_discounted_price(instrument, discount)
+except KeyError:
+  print('Instrument not found')
+except TypeError:
+  print('Discount must be a number')
+except:
+  print('An exception occurred that is not KeyError or TypeError!')
+
+
+# else clause:
+# sometimes we want to execute code only if no exception is encountered
+# we can use else clause to execute code only if no exception is encountered
+
+x = 1
+try:
+  x = 1/0
+except ZeroDivisionError:
+  print('A zero division error occurred!')
+else:
+  x += 1
+print(x)
+
+# we've seen how exception handlers get executed when we encounter exceptions during a try clause but what if we want to execute code only if no exception is encountered?
+
+def check_password():
+  # raise ValueError('Password is incorrect!')
+  pass
+
+def login_user():
+  print('User logged in!')
+  pass
+
+try:
+  check_password()
+except ValueError:
+  print('Value error occurred!')
+else:
+  print('Password is correct!')
+  login_user()
+
+
+# we could also argue, that we could have executed else block code in try block to achieve the same result
+try:
+  check_password()
+  login_user()
+  # 20 other lines of imaginary code
+except ValueError:
+  print('Wrong Password! Try again!')
+
+# python offers a bit of insight on this matter, use of the else clause is better than adding additional code to the try clause because it avoids accidentally catching an exception that wasn’t raised by the code being protected by the try … except
+
+# this aforementioned suggestion is valid in this case since alternatively value error could have occured in any of the other lines of code that is not detected in check_password function, and it would be challenging for us to tell where that came from.
+
+# exercise:
+customer_rewards = {
+  'Zoltan': 82570,
+  'Guadalupe': 29850,
+  'Mario': 17849
+}
+
+def display_rewards_account(customer):
+  # Write your code below:
+  try:
+    rewards_number = customer_rewards[customer] 
+  except KeyError:
+    print('Customer not found')
+  else:
+    print('Rewards account number is: ' + str(rewards_number))
+
+
+# customer = 'Zuigly'
+customer = 'Guadalupe'
+display_rewards_account(customer)
+
+# finally clause
+# finally clause is useful when we want to execute some code regardless if an exception is encountered or not
+
+def load_footer():
+  print('Footer loaded!')
+
+try:
+  check_password()
+except ValueError:
+  print('Wrong Password! Try again!')
+else:
+  login_user()
+  # 20 other lines of imaginary code
+finally:
+  load_footer()
+
+# observations:
+# in above code we are loading footer regardless if an exception is encountered or not
+
+# also be noted that finally clause can be used independently of exception handling or else block, this is convenient when we want to execute some code regardless if an exception is encountered or not
+
+try:
+  check_password()
+finally:
+  load_footer()
+  # 20 other lines of imaginary code
+
+# exercise:
+# import database  # if we had to import it from another filoe named database.py, which i have hardcoded it in here for convenience
+instruments = {
+    'Kora': {
+        'Family': 'Strings',
+        'Origin': 'West Africa',
+    },
+    'Didgeridoo': {
+        'Family': 'Wind',
+        'Origin': 'Northern Australia',
+    },
+    'Guitar': {
+        'Family': 'Strings',
+        'Origin': 'Spain',
+    }
+}
+
+def connect_to_database():
+    print('Establishing connection to instrument database server...')
+
+def disconnect_from_database():
+    print('Destroying connection to instrument database server...')
+
+def get_instrument_info(instrument):
+    return instruments[instrument]
+
+def display_instrument_info(instrument):
+    info = get_instrument_info(instrument)
+    print('Instrument: ' + instrument)
+    print('Family: ' + info['Family'])
+    print('Origin: ' + info['Origin'])
+
+# instrument = 'Synthesizer'
+instrument = 'Didgeridoo'
+# database.connect_to_database()
+connect_to_database()
+
+try:
+  # database.display_instrument_info(instrument)
+  display_instrument_info(instrument)
+except KeyError:
+  print('Oh no! This instrument does not exist.')
+else:
+  print(instrument)
+# Write your code below: 
+finally:
+  # database.disconnect_from_database()
+  disconnect_from_database()
