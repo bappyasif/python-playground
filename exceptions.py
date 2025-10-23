@@ -420,3 +420,141 @@ else:
 finally:
   # database.disconnect_from_database()
   disconnect_from_database()
+
+
+# user defined exceptions:
+# so far we've seen how to raise and manage built in exceptions, in most programs using builtin exceptions wont always be most detailed way to describe an error occuring
+# what if we could create custom exceptions that are more specific to a program or module.
+# python gives us ability to create user defined exceptions.
+
+# user defined exceptions are exceptions that we create to allow for better readability in our program's errors
+
+# custom exceptions are created by inheriting from the Exception class
+
+class CustomError(Exception):
+  pass
+
+# observations:
+# in above code we are creating a custom exception called CustomError, it inherits from Exception class
+# now we can raise CustomError just like any other exception
+# although not required, most custom exceptions end in Error similar to naming of built-in exceptions.
+
+# first lets see how these custom exceptions helps us better document our errors
+
+# lets imagine Intrument world has an optional delivery service for instruments, if someone tries to schedule a delivery but their address is too far, we want to raise a custom LocationTooFarAway exception, this is a custom exception that inherits from Exception class
+class LocationTooFarError(Exception):
+   pass
+
+def schedule_delivery(distance_from_store):
+    if distance_from_store > 10:
+        raise LocationTooFarError
+    else:
+        print('Scheduling the delivery...')
+
+# Write your code below:
+try:
+  schedule_delivery(10)
+except LocationTooFarError:
+  print('Location too far!')
+
+# observations:
+# in above code we are catching LocationTooFarError exception and printing custom message
+
+# excercise:
+inventory = {
+  'Piano': 3,
+  'Lute': 1,
+  'Sitar': 2
+}
+
+#Write your code below (Checkpoint 2):
+class InventoryError(Exception):
+  pass
+
+def submit_order(instrument, quantity):
+  supply = inventory[instrument]
+  
+  # Write your code below (Checkpoint 3 & 4): 
+  if quantity > supply:
+    raise InventoryError
+  else:  
+    inventory[instrument] -= quantity
+    print('Successfully placed order! Remaining supply: ' + str(inventory[instrument]))
+
+instrument = 'Piano'
+quantity = 1
+submit_order(instrument, quantity)
+
+
+# customizing user defined exceptions:
+# we've seen how defining a simple exception class can provide a more specific use useful error to users
+# defining a simple class is just first step to create better exceptions in our programs, python does not stop us from customizing our custom exception classes even further
+
+# lets say we wanted to expand our LocationTooFarError from earlier to also provide a custom error message
+
+class LocationTooFarErr(Exception):
+  def __init__(self, distance):
+    self.distance = distance
+
+  def __str__(self):
+    return 'Location too far, not within delivery range of 10 miles! Distance: ' + str(self.distance)
+
+# observations:
+# in above code we are using __init__ method to provide custom message to user
+
+# we can also use __str__ method to provide custom message string and return to user
+
+def schedule_delivery(distance_from_store):
+    if distance_from_store > 10:
+        raise LocationTooFarErr(distance_from_store)
+    else:
+        print('Scheduling the delivery...')
+
+schedule_delivery(10)
+# observations:
+# in above code we are catching LocationTooFarErr exception and printing custom message
+
+# exercise:
+# Write your code below (Checkpoint 1 & 2)
+class InventoryError(Exception):
+  def __init__(self, supply):
+    self.supply = supply
+
+  def __str__(self):
+    return "Available supply is only "+str(self.supply)
+
+inventory = {
+  'Piano': 3,
+  'Lute': 1,
+  'Sitar': 2
+}
+
+def submit_order(instrument, quantity):
+  supply = inventory[instrument]
+  # Write your code below (Checkpoint 3)
+  if quantity > supply:
+    raise InventoryError(supply)
+  else:
+    inventory[instrument] -= quantity
+    print('Successfully placed order! Remaining supply: ' + str(inventory[instrument]))
+
+instrument = 'Piano'
+quantity = 2
+submit_order(instrument, quantity)
+
+# observations:
+# in above code we are catching InventoryError exception and printing custom message
+
+# excercise:
+instrument_families = {
+  'Strings': ['Guitar', 'Banjo', 'Sitar'],
+  'Percussion': ['Conga', 'Cymbal', 'Cajon'],
+  'woodwinds': ['Flute', 'Oboe', 'Clarinet']
+}
+
+def print_instrument_families():
+  for family in ['Strings', 'Percussion', 'woodwinds']:
+    # print('Some instruments in the ' family + 'family are: ' + instrument_families[family]) # some errors here
+    print('Some instruments in the ' + family + 'family are: ' + str(instrument_families[family]))
+
+print_instrument_families()
