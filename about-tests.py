@@ -42,7 +42,8 @@ class TestTimesTen(unittest.TestCase):
 # exercise: 
 def get_daily_movies():
     print('Retrieving the movie set to play on today\'s flight...')
-    return ['Parasite', 'Nomadland', 'Roma', 'Black Widow', 'Spiral']
+    # return ['Parasite', 'Nomadland', 'Roma', 'Black Widow', 'Spiral']
+    return ['Parasite', 'Nomadland', 'Roma']
 
 
 def get_licensed_movies():
@@ -157,5 +158,118 @@ class CheckInKioskTests(unittest.TestCase):
   @classmethod
   def tearDownClass(cls):
     power_off_kiosk()
+
+# unittest.main()
+
+# skipping tests
+# sometimes we have tests that should only run in a particular context, for example we might have a group of tests that only runs on windows operating system but not linux or macOS, fo rsituations like these its useful to skip tests
+
+# unittest framework provides two different ways to skip tests, `@unittest` decorator and `skipTest` method
+
+# skip decorator:
+# there are two decorator options to accomplish goal of skipping a test 
+
+import sys
+
+class LinuxTests(unittest.TestCase):
+
+    @unittest.skipUnless(sys.platform.startswith("linux"), "Only runs on Linux!!")
+    def test_linux_feature(self):
+        print("Testing a linux feature!!!!")
+
+    @unittest.skipIf(not sys.platform.startswith("linux"), "Linux Only!!")
+    def test_other_linux_feature(self):
+        print("Testing other linux feature!!!!")
+
+# unittest.main()
+
+# observations:
+# skipUnless option skips test if condition evaluates to false
+# skipIf option skips test if condition evaluates to true
+
+# both share common requirements, firstly both of these skip decorators are prefaced with @unittest to denote decorator pattern.
+# both take a condition as first argument and folowed by a string message as second
+
+# in above example both decorators achieve same goal: skipping if os is not linux
+
+
+
+# second way to skip tests is to call skipTest method of TestCase class
+
+class LinuxTests(unittest.TestCase):
+
+    print(sys.platform, "platform!!")
+
+    def test_linux_feature(self):
+        if not sys.platform.startswith("m"):
+            self.skipTest("Test only on liunux!!")
+        # print("Testing a linux feature!!!!")
+
+    def test_other_linux_feature(self):
+        if not sys.platform.startswith("m"):
+            self.skipTest("Test only on liunux!!")
+        # print("Testing other linux feature!!!!")
+
+
+# unittest.main()
+
+# observations:
+# here we call skipTest method from within test function itself, it takes a single string message as its argument and always causes test to be skipped when called
+
+# skip decorators are slightly more convenient and make it more readble to see under what condition tests are skipped
+# when conditions for skipping a test are complex to pass into a skip decorator then skipTest method is recommended alternative
+
+# exercise:
+def regional_jet():
+    print('This is a regional jet...')
+    return True
+
+def get_daily_movie():
+    print('Retrieving the movie set to play on today\'s flight...')
+    return 'Parasite'
+
+
+def get_licensed_movies():
+    print('Retrieving the list of licenses movies from the database...')
+    licensed_movies = ['Parasite', 'Nomadland', 'Roma']
+    return licensed_movies
+
+
+def get_wifi_status():
+    print('Checking WiFi signal...')
+    print('WiFi is active')
+    return True
+
+def get_device_temp():
+    print('Reading the temperature of the entertainment system device...')
+    return 33.2
+
+def get_maximum_display_brightness():
+    print('Calculating maximum display brightness in nits...')
+    return 399.99999999
+
+class EntertainmentSystemTests(unittest.TestCase):
+    @unittest.skipIf(regional_jet(), "Not available on regional jets")
+    def test_movie_license(self):
+        licensed_movies = get_licensed_movies()
+        daily_movies = get_daily_movies()
+        self.assertIn(daily_movies, licensed_movies)
+
+    @unittest.skipUnless(regional_jet(), "Not available on regional jets")
+    def test_wifi_status(self):
+        wifi_enabled = get_wifi_status()
+        self.assertTrue(wifi_enabled)
+
+    def test_device_temp(self):
+        if not regional_jet():
+            self.skipTest("Not available on regional jets")
+        device_temp = get_device_temp()
+        self.assertLess(device_temp, 35)
+
+    def test_maximum_display_brightness(self):
+        if not regional_jet():
+            self.skipTest("Not available on regional jets")
+        brightness = get_maximum_display_brightness()
+        self.assertAlmostEqual(brightness, 400)
 
 unittest.main()
