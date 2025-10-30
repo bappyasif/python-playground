@@ -115,7 +115,7 @@ class BluetoothDeeviceTests(unittest.TestCase):
     def tearDownClass(cls):
         power_cycle_device()
 
-unittest.main()
+# unittest.main()
 
 # observations:
 # we replaced our setup method with setUpClass method and added @classMethod decorator, changed argument from self cls becuase of class method
@@ -271,5 +271,91 @@ class EntertainmentSystemTests(unittest.TestCase):
             self.skipTest("Not available on regional jets")
         brightness = get_maximum_display_brightness()
         self.assertAlmostEqual(brightness, 400)
+
+# unittest.main()
+
+
+
+# expected failures
+# sometimes we have a test that we know will fail, this could happen when a feature has a known bug ir designed to fail on purpose, in that case we wouldnt want an expected failure to occur and cloud out test case results,, rather than simply skipping test, unittest provides a way rto mark test as expected failures.
+# expected failures are counted as passed in our test case results, if test passes when we expected it to fail then it is marked as failed in test results
+# to setup a test to have an expected failure we can use expectedFailure decorator
+
+class FeatureTests(unittest.TestCase):
+    @unittest.expectedFailure
+    def test_broken_feature(self):
+        raise Exception('This feature is broken!')
+
+# unittest.main()
+
+# observations:
+# we use expectedFailure decorator to mark test as expected failure
+# expectedFailure decorator does not take any arguments, test in example will always fail because there is an exception raisedduring test execution, test failyre didnt cause test to fail in results because it was marked ex expected 
+
+# exercise:
+class FormError(Exception):
+    pass
+
+def issue_survey():
+    print('Opening customer survey')
+    raise FormError('An error occurred when opening customer survey form!')
+
+def log_customer_complaint():
+    print('Opening customer complaint form')
+    print('Logged customer complaint')
+    return 'Success'
+
+class CustomerFeedbackTests(unittest.TestCase):
+    # def test_survey_form(self):
+    #     self.assertEqual(issue_survey, 'Success')
+
+    @unittest.expectedFailure
+    def test_survey_form(self):
+        self.assertEqual(issue_survey, 'Success')
+
+    def test_complaint_form(self):
+        result = log_customer_complaint()
+        self.assertEqual(result, 'Success')
+
+# unittest.main()
+
+# review:
+# we covered materials related to unit testing in python and learned:
+# differenrce between manual and automagted testing
+# what unit tests asre
+# how to write tests with assert keyword
+# how to create and run gtest cases with unittest framework
+# best practices for test fixures, test parameterizations, test skipping and test expected failures
+
+# world of testing is very vast and can take time to master but basic principles will remain same regardless of framework and language, incorporating best practices is key to improving test quality, test coverage to ensure code buugs free
+
+# exercise
+import warnings
+
+class CustomerRequestWarning(Warning):
+  pass
+
+def calculate_remaining_time(km):
+  '''
+  This function estimates the remaining flight time when given the kilometers that remain for this flight. The function assumes an average speed of 15 km per minute and rounds down when calculating minutes. It returns a tuple of hours and then minutes remaining. 
+  '''
+  total_minutes = int(km / 15)
+  minutes = total_minutes % 60
+  hours = int(total_minutes / 60)
+  return (hours, minutes)
+
+def request_flight_attendant():
+  '''
+  This function raises a CustomerRequestWarning to let the flight attendants know that they are requested. 
+  '''
+  warnings.warn('A customer has requested attention!', CustomerRequestWarning)
+
+class FlightOperationsTests(unittest.TestCase):
+    def test_request_flight_attenddant(self):
+        self.assertWarns(CustomerRequestWarning, request_flight_attendant)
+
+    @unittest.expectedFailure
+    def test_calculate_remaining_time(self):
+        self.assertTupleEqual(calculate_remaining_time(200), (3, 20))
 
 unittest.main()
