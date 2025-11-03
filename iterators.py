@@ -216,3 +216,157 @@ for customer in customer_counters:
         # examples: product(), permutations(), combinations()
 
 # we can use itertools module  by importing it from python standard library
+
+# Infinite iterator: Count
+# an infinite iterator wil repeat an infinite number if times with no endpoint and no StopIteration exception raised.
+# infinite iterators are useful when we have unbounded streams of data to process
+
+# a useful itertool that is an infinite iterator is count() itertool
+# this itertool will count from a first value until we provide some type of stop condition, base syntax looks like this: count(start=0, step=1)
+# first agrument of count is value where we start counting from, second argument is an optional step that will return `current value + step`
+# step value can be positive, negative and an integer or a float number, it will always defaulted to 1 if not provided
+
+# to show how its used in a scenario, suppose we want to quickly count up and print all even numbers from 0 to 20
+# we first import our itertools module and then create a loop (while or for loop) that will iterate through our count() iterator
+
+import itertools
+
+for i in itertools.count(start=0, step=2):
+    print(i)
+    if i >= 20:
+        break
+
+# observations:
+# we set our start argument to 0 so that we start counting from 0
+# we set our step argument to 2 so that we can increment +2 on each iteration
+# we create a stop condition which is i >= 20 otherwise this for loop will continue printing forever!
+
+# exercise:
+max_capacity = 100
+num_bags = 0
+
+for i in itertools.count(start=13.5, step=13.5):
+    if i >= max_capacity:
+        break
+
+    num_bags += 1
+    print(f"Bag {num_bags} was packed!")
+
+
+# input-dependent iterator: chain
+# an input dependent iterator will terminate based on length of one or more input values.
+# they are very usefull for working with and modifying existing iterators
+
+# a useful itertool that is an input-dependent iterator is chain() itertool
+# chain() takes in one or more iterables and combine them into a single iterator, basic syntax looks like this: chain(*iterables)
+
+# input value of chain() is one or more iterables of same or varying iterable types
+# for example, we could use chain() itertool to combine a list and a set into one single iterator
+
+# to show how its used in a scenario, suppose we want to combine a `list` containing odd numbers and a `set` containing even numbers
+
+odd = [1, 3, 5, 7]
+even = {0, 2, 4, 6, 8}
+
+all_numbers = itertools.chain(odd, even)
+
+for number in all_numbers:
+    print(number)
+
+# observations:
+# sets all numbers to an iterator returned by chain() itertool
+# uses a `list` and a `set` as input values for chain() itertool
+# implements a `for` loop that iterates through all numbers returned by chain() itertool which is `all_numbers` iterator
+# prints all numbers returned by chain() itertool
+# output is finite since input iterables `odd` and `even` are also finite
+
+# note that python sets are not ordered so lasetly combined `even` numbers set will not always be in initialized order
+
+# exercise:
+great_dane_foods = [2439176, 3174521, 3560031]
+min_pin_pup_foods = [6821904, 3302083]
+pawsome_pup_foods = [9664865]
+
+# Write your code below: 
+all_skus_iterator = itertools.chain(great_dane_foods, min_pin_pup_foods, pawsome_pup_foods)
+
+for val in all_skus_iterator:
+  print(val)
+
+
+# combinatoric iterator: combinations
+# a combinatoric iterator will perform a set of statistical or mathematical operations on an input iterable 
+
+# a useful itertool is a combinatoric iterator is combinations() itertool
+# this itertool will produce an iterator of tuples that contain combinations of all elements in input, basic syntax looks like this: combinations(iterable, r)
+
+# combinations() itertool takes in an iterator that can be used in a `for` loop or can be converted into an iterable type using `list()` or a `set()`
+
+# to show how its used, suppose we have a list of even numbers and we want all possible combinations of 2 even numbers:
+
+# combinations() itertool takes in two inputs, first is an iterable and second is a value `r` that represents length of each combination tuple
+
+# return type of `combinations()` is an iterator that can be used in a a `for` loop or can be converted to an iterable type using `list()` or `set()`
+
+# to show how its used, suppose we have a list of even numbers and we want all possible combinations of 2 even numbers:
+even_numbers = [2, 4, 6, 8]
+even_combinations = itertools.combinations(even_numbers, 2)
+print(even_combinations)
+print(list(even_combinations))
+
+# observations:
+# created an iterator using combinations() with `list` of even numbers as first argument and `2` as second argument
+# set `even_combinations` equal to a `list` of elements in iterator returned from `combinations()` itertool
+# printed `even_combinations` iterator
+# printed `list` of elements in `even_combinations` iterator, resulting list of all possible combinations of 2 even numbers members tuples
+
+# exercise:
+collars = ["Red-S","Red-M", "Blue-XS", "Green-L", "Green-XL", "Yellow-M"]
+
+# Write your code below: 
+collar_combo_iterator = itertools.combinations(collars, 3)
+collar_combos = list(collar_combo_iterator)
+print(collar_combos)
+
+for combo in collar_combos:
+    print(combo)
+
+# review: we covered
+# iterables and iterators and how they differ
+# using `iter()` function to create an iterator object
+# using `next()` function to manually iterate over an iterator object
+# how `for` loops use iterables and iterators
+# how to write custom iterators by implementing `__iter__()` and `__next__()` methods
+# how to use built-in itertools including `count()`, `chain()`, `combinations()`
+
+# exercise:
+# Write your code below:
+cat_toys = [('laser', 1.99), ('squeaky', 2.00), ('toy', 10.00), ('ball', 5.00), ('fountain', 15.00), ('scratcher', 10.99)]
+max_money = 15
+options = []
+
+cat_toys_iterator = iter(cat_toys)
+print(next(cat_toys_iterator))
+print(next(cat_toys_iterator))
+print(next(cat_toys_iterator))
+print(next(cat_toys_iterator))
+
+toy_combos = itertools.combinations(cat_toys, 2)
+
+for combo in toy_combos:
+    print(combo)
+    toy1 = combo[0]
+    cost_of_toy1 = toy1[1]
+    toy2 = combo[1]
+    cost_of_toy2 = toy2[1]
+
+    if cost_of_toy1 + cost_of_toy2 <= max_money:
+        options.append(combo)
+
+print(options)
+
+#for combo in toy_combos:
+#    toy1 = combo[0]
+#    cost_of_toy1 = toy1[1]
+#    toy2 = combo[1]
+#    cost_of_toy2 = toy2[1]
