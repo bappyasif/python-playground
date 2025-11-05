@@ -258,3 +258,281 @@ for i in student_id_generator:
   if i == 1:
     i = student_id_generator.send(45)
   print(i)
+
+
+# generator methods: throw()
+# generator method `throw()` provides ability to throw an exception inside generator from caller point.
+# this can be useful if we need to end generator once it reaches a certain value or condition.
+
+def generator():
+    i = 0
+    while True:
+        yield i
+        i += 1
+
+my_generator = generator()
+for item in my_generator:
+    print(item)
+    if item > 5:
+       break
+        # my_generator.throw(ValueError, "Value exceeded limit of 5") # raises ValueError exception inside generator
+        # my_generator.throw(StopIteration)  # raises StopIteration exception to end generator
+
+# observations:
+# in above example, generator function defines an infinite iterator that starts counting from 0.
+# in for loop, each value yielded by generator is printed until value exceeds 5.
+# once value exceeds 5, `throw()` method is called on generator object, which raises ValueError exception inside generator.
+# if StopIteration exception is raised using `throw()` method, it will signal end of generator and terminate iteration.
+
+
+# exercise:
+def student_counter():
+  for i in range(1,5001):
+    yield i
+
+student_generator = student_counter()
+for student_id in student_generator:
+  # Write your code below:
+  if student_id > 100:
+    break
+    # student_generator.throw(ValueError, "Invalid student ID") # raises ValueError exception inside generator
+  print(student_id)
+
+
+# generator methods: close()
+# generator method `close()` is used to terminate a generator early.
+# once `close()` method is called generator is finished just like end of a loop, any further attempts to iterate over generator will raise StopIteration exception.
+
+def generator():
+   i = 0
+   while True:
+      yield i
+      i += 1
+
+my_generator = generator()
+next(my_generator)  # Output: 0
+next(my_generator)  # Output: 1
+my_generator.close()  # Close the generator
+# next(my_generator)  # Raises StopIteration
+
+# observations:
+# in above example, generator function defines an infinite iterator that starts counting from 0.
+# first two calls to `next()` function retrieve values 0 and 1 from generator.
+# then `close()` method is called on generator object, which terminates generator.
+# any further attempts to call `next()` on closed generator will raise StopIteration exception.
+
+# `close()` method works by raising a GeneratorExit exception inside generator, which signals generator to terminate. this exception is generally ignored but can be handled using try-except block inside generator if needed.
+
+def generator():
+      i = 0
+      while True:
+        try:
+            yield i
+        except GeneratorExit:
+            print("Early exit, byeee!!")
+            break
+        i += 1
+
+my_generator = generator()
+for item in my_generator:
+   print(item)
+   if item >= 5:
+      my_generator.close()
+
+# observations:
+# in above example, generator function defines an infinite iterator that starts counting from 0.
+# inside generator, a try-except block is used to catch GeneratorExit exception raised by `close()` method.
+# when generator is closed after yielding value 5, exception is caught and message "Early exit, byeee!!" is printed before generator terminates.
+
+# putting `yield` expression in a `try` block we can handle `GeneratorExit` exception. in this case we simply print a message and break out of loop to end generator gracefully.
+# because we interrupted normal flow of generator using `close()` method, we must also use `break` statement to exit loop, otherwise a `RuntimeError` will be raised indicating that generator ignored `GeneratorExit` exception.
+
+# exercise:
+def student_counter():
+   for i in range(1, 200):
+      yield i
+
+student_generator = student_counter()
+for student_id in student_generator:
+   if student_id > 100:
+      student_generator.close()
+      break
+   print(student_id)
+
+
+# connecting generators:
+# there are some cases where it is useful to connect multiple generators into one. this allows us to delegate operations of one generator to another sub generator.
+# connecting generators is similar to using itertools `chain()` function combine iterators into a single iterator but connecting generators allows for more complex interactions between generators.
+
+# in order to connect generators we use `yield from` statement, an example of how it is used is shown below:
+def cs_courses():
+   yield "Computer Science 101"
+   yield "Computer Science 102"
+
+def art_courses():
+   yield "Art History 101"
+   yield "Painting 101"
+
+def all_courses():
+   yield from cs_courses()
+   yield from art_courses()
+   yield "Physical Education 101"
+
+combined_generator = all_courses()
+
+# print(next(combined_generator))  # Output: Computer Science 101
+# print(next(combined_generator))  # Output: Computer Science 102
+# print(next(combined_generator))  # Output: Art History 101
+# print(next(combined_generator))  # Output: Painting 101
+# print(next(combined_generator))  # Output: Physical Education 101
+# print(next(combined_generator))  # Raises StopIteration
+
+for course in combined_generator:
+   print(course, "!!")
+
+# observations:
+# in above example, we have 3 generator functions: `cs_courses()`, `art_courses()`, and `all_courses()`.
+# `all_courses()` generator uses `yield from` statement to delegate yielding of values to `cs_courses()` and `art_courses()` generators.
+# when we iterate over `combined_generator`, it will yield all courses from both sub generators as well as "Physical Education 101".
+# `yield from` statement simplifies code by eliminating need for nested loops to iterate over sub generators. it also allows for seamless integration of multiple generators into a single generator function.
+
+# exercise:
+def science_students(x):
+   for i in range(1, x+1):
+      yield i
+
+def non_sceience_students(x, y):
+   for i in range(x, y+1):
+      yield i
+
+def all_students():
+   yield from science_students(5)
+   yield from non_sceience_students(6, 10)
+   yield from non_sceience_students(20, 29)
+
+student_generator = all_students()
+
+for student_id in student_generator:
+   print(student_id)
+
+
+# generator pipelines:
+# generator pipelines allows us to use multiple generators to perform a series of operations all within one expression.
+# we can break down complex operations into smaller, more manageable parts where they can be pipelined together to achieve desired output.
+
+# to pipeline generators, output of one generator function can be input of another generator function, resulting generator can then be used as input for another generator function and so on.
+
+# pipeline generators are also often referred to as "nested generators", we can use a pipeline generator like this below:
+
+def number_generator():
+   i = 0
+   while True:
+      yield i
+      i += 1
+
+def even_number_generator(numbers):
+   for number in numbers:
+      if number % 2 == 0:
+         yield number
+
+even_numbers = even_number_generator(number_generator())
+
+for even in even_numbers:
+   print(even)
+   if even >= 10:
+      break
+   
+# observations:
+# in above example, we have two generator functions: `number_generator()` and `even_number_generator()`.
+# `number_generator()` generates an infinite sequence of numbers starting from 0.
+# `even_number_generator()` takes an input generator and yields only even numbers from that generator.
+# we create a pipeline by passing the output of `number_generator()` as input to `even_number_generator()`.
+# when we iterate over `even_numbers` generator, it will yield even numbers from the infinite sequence generated by `number_generator()`.
+# we use a break condition to stop iteration once we reach an even number greater than or equal to 10.
+# output is finite since `number_generator()` is infinite but `even_number_generator()` filters out odd numbers, resulting in a finite sequence of even numbers.
+
+# to note, even_numbers generator variable holds an `even_number_generator()` object with `number_generator()` object as its input.
+# when we iterate over even_numbers only even numbers from infinite sequence are yielded.
+
+# exercise:
+def course_generator():
+   yield("Computer Science", 5)
+   yield("Mathematics", 4)
+   yield("Physics", 3)
+   yield("Biology", 4)
+
+def add_five_students(courses):
+   for c, n in courses:
+      yield (c, n+5)
+
+increased_students = add_five_students(course_generator())
+
+for course in increased_students:
+   print(course, course[0], "now has", course[1], "students")
+
+
+# review:
+# in this lesson we learned how to:
+# 1. create generator functions using `yield` expression
+# 2. implement generator expressions for concise iterator creation
+# 3. use generator methods like `send()`, `throw()`, and `close()`
+# 4. connect generators into single generator using `yield from`
+# 5. use nested generators to create generator pipelines for complex data processing tasks.
+
+# exercise:
+def summa():
+    yield 'Summa Cum Laude'
+def magna():
+    yield 'Magna Cum Laude' 
+def cum_laude():
+    yield 'Cum Laude'
+# Write your code below:
+# def graduation_countdown(days):
+#    while days >= 0:
+#       yield days
+#       days -= 1
+
+# refactor graduation_countdown so that we can make use of `send()` method
+# def graduation_countdown(days):
+#    while days >= 0:
+#       new_day = yield days
+#       if new_day is not None:
+#          days = new_day
+#       else:
+#          days -= 1
+
+# Modify the graduation_countdown() generator function to accept values sent using send(). Use a local variable called days_left to store sent values. Use an if/else statement to check for sent values.
+def graduation_countdown(days):
+   while days >= 0:
+      days_left = yield days
+      if days_left is not None:
+         days = days_left
+      else:
+         days -= 1
+days = 10
+# countdown_generator = graduation_countdown(days)
+# generator expression for descending days that is equivalent to graduation_countdown function
+
+countdown_generator = (day in range(days, -1, -1) for day in range(days, -1, -1))
+
+grad_days = graduation_countdown(days)
+
+for day in grad_days:
+   if day == 15:
+      grad_days.send(10)
+   print(f"Days Left: {day}")
+
+gpas = [3.2, 4.0, 3.6, 2.9]
+
+def honors_generator(gpas):
+   for gpa in gpas:
+        if gpa >= 3.9:
+             yield from summa()
+        elif gpa >= 3.7:
+             yield from magna()
+        elif gpa >= 3.5:
+             yield from cum_laude()
+
+honors = honors_generator(gpas)
+for honor in honors:
+   print(honor)
