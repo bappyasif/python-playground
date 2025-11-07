@@ -143,3 +143,99 @@ tag_set.discard("helloworld")
 
 song_data_users['Retro Words'] = tag_set
 print(song_data_users)
+
+# finding elements in a set:
+# in pyhthon `set` and `frozenset` items cannot be accessed by a specific index. this is due to fact that both containers are unordered anfd have no indices
+# however like most other python containers, we can use `in` keyword to test if an element is in a `set` or `frozenset`
+
+song_tags = {'counrty', 'folk', 'bluegrass', 'acoustic'}
+
+print('folk' in song_tags)  # Output: True
+print('indie' in song_tags)  # Output: False
+
+frozen_tags = frozenset(song_tags)
+
+print('folk' in frozen_tags)  # Output: True
+print('indie' in frozen_tags)  # Output: False
+
+# exercise:
+allowed_tags = ['pop', 'hip-hop', 'rap', 'dance', 'electronic', 'latin', 'indie', 'alternative rock', 'classical', 'k-pop', 'country', 'rock', 'metal', 'jazz', 'exciting', 'sad', 'happy', 'upbeat', 'party', 'synth', 'rhythmic', 'emotional', 'relationship', 'warm', 'guitar', 'fiddle', 'romance', 'chill', 'swing']
+
+song_data_users = {'Retro Words': ['pop', 'explosion', 'hammer', 'bomb', 'warm', 'due', 'writer', 'happy', 'horrible', 'electric', 'mushroom', 'shed']}
+
+# Write your code below!
+tag_set = set(song_data_users['Retro Words'])
+
+# keeping track of bad tags
+bad_tags = set()
+for tag in tag_set:
+    if tag not in allowed_tags:
+        bad_tags.add(tag)
+
+# now removing bad tags from tag_set
+for tag in bad_tags:
+    if tag in tag_set:
+        # tag_set.remove(tag)
+        tag_set.discard(tag)
+
+song_data_users['Retro Words'] = tag_set
+print(song_data_users)
+
+
+
+# introduction to set operations:
+# a lot of usefulness of a set container comes from set operations, these allows you to combine sets, find difeerence and intersections of sets and more
+# you can combine these operations to perform complex logic problems on multiple sets, this can be useful for filtering items, categorizing, combining as well as many other uses.
+
+# operations which we will be looking at are:
+# unions
+# intersections
+# difference
+# symmetric difference
+
+# set union
+# when working with `set` or `frozenset` container one of most common operations we can perform is a merge.
+# to do this we can return union of two sets using `union()` method or `|` operator.
+# doing so will return a new `set` or `frozenset` containing all elements from both sets without duplicates
+
+# resulting set contains all elements in both set `A` and set `B` as well as elements they have in common except for duplicates
+# in this case we are only looking at merging two sets but its also common to perform operation on as many as we need
+
+prepare_to_py = {'rock', 'heavy metal', 'electric', 'guitar', 'synth'}
+
+py_and_dry = frozenset({'classical', 'rock', 'jazz', 'electronic', 'guitar', 'rock and roll'})
+
+combined_tags = prepare_to_py.union(py_and_dry)
+print(combined_tags)
+
+# using `|`:
+frozen_combined_tags = py_and_dry | prepare_to_py
+print(frozen_combined_tags, "combined tags")
+
+# note that return value in both methods takes form of left operand, in first example since prepare_to_py() called `union()` function so that result was a regular `set`, in second example since py_and_dry() was left operand in `|` operation so result was a frozenset
+
+# exercise:
+song_data = {'Retro Words': ['pop', 'warm', 'happy', 'electronic'],
+             'Wait For Limit': ['rap', 'upbeat', 'romance'],
+             'Stomping Cue': ['country', 'fiddle', 'party'],
+             'Lowkey Space': ['electronic', 'dance', 'synth']}
+
+user_tag_data = {'Lowkey Space': ['party', 'synth', 'fast', 'upbeat'],
+                 'Retro Words': ['happy', 'electronic', 'fun', 'exciting'],
+                 'Wait For Limit': ['romance', 'chill', 'rap', 'rhythmic'], 
+                 'Stomping Cue': ['country', 'swing', 'party', 'instrumental']}
+
+# Write your code below!
+new_song_data = {}
+
+for item in song_data.items():
+    # tag_set = set(song_data[item]) # getting unhashable type error
+    tag_set = set(item[1])
+    # user_tag_set = set(user_tag_data[item])
+    user_tag_set = set(user_tag_data[item[0]])
+    combined_tags = tag_set.union(user_tag_set)
+
+    # new_song_data[item] = combined_tags # getting unhashable type error
+    new_song_data[item[0]] = combined_tags
+
+print(new_song_data)
