@@ -239,3 +239,71 @@ for item in song_data.items():
     new_song_data[item[0]] = combined_tags
 
 print(new_song_data)
+
+
+# Set intersection:
+# lets say that we have two or more sets and we want to find which items both sets have in common
+# `set` container has a method called `intersection()` which returns a new `set` or `frozenset` consisting og those elements.
+# an intersection can also be performed on multiple sets using `&` operator
+
+# similar to other operations, type of first operand on left side will determines if a `set` or `frozenset` will be returned when finding intersection
+
+# here is an intersection looks like in python:
+prepare_to_py = {'rock', 'heavy metal', 'electric', 'guitar', 'synth'}
+
+py_and_dry = frozenset({'classical', 'rock', 'jazz', 'electronic', 'guitar', 'rock and roll'})
+
+frozen_intersected_tags = py_and_dry.intersection(prepare_to_py)
+print(frozen_intersected_tags, "frozen intersected tags")
+
+set_intersected_tags = prepare_to_py & py_and_dry
+print(set_intersected_tags, "set intersected tags")
+
+# in addition to a regular intersection `set` container can also use a method called `intersection_update()`, instead of returning a new `set` original set is updated to contain result of intersection.
+
+# exercise:
+song_data = {'Retro Words': ['pop', 'warm', 'happy', 'electronic', 'synth'],
+             'Wait For Limit': ['rap', 'upbeat', 'romance'],
+             'Stomping Cue': ['country', 'fiddle', 'party'],
+             'Lowkey Space': ['electronic', 'dance', 'synth', 'upbeat'],
+             'Back To Art': ['pop', 'sad', 'emotional', 'relationship'],
+             'Blinding Era': ['rap', 'intense', 'moving', 'fast'],
+             'Down To Green Hills': ['country', 'relaxing', 'vocal', 'emotional'],
+             'Double Lights': ['electronic', 'chill', 'relaxing', 'piano', 'synth']}
+
+user_recent_songs = {'Retro Words': ['pop', 'warm', 'happy', 'electronic', 'synth'],
+                     'Lowkey Space': ['electronic', 'dance', 'synth', 'upbeat']}
+
+# Write your code below!
+tags_int = set(user_recent_songs['Retro Words']).intersection(set(user_recent_songs['Lowkey Space']))
+
+recommended_songs = {}
+
+# for item in song_data.items():
+#     type_name = item[0]
+#     if(type_name != 'Recent Songs'):
+#         recommended_songs[type_name] = set(item[1]).intersection(tags_int)
+
+# for item in song_data.items():
+#     for tag in tags_int:
+#         if tag in item[1]:
+#             recommended_songs[item[0]] = item[1]
+
+for item in song_data.items():
+    # loop through each tag in song_data for a specific song
+    for tag in item[1]:
+        # if tag is in of specific song
+            if tag in tags_int:
+                #  if user has not listned to specific song
+                if item[0] not in user_recent_songs:
+                    # add song to recommended_songs
+                    recommended_songs[item[0]] = item[1]
+
+
+# for item in song_data.items():
+#     for tag in item[1]:
+#         if tag in tags_int:
+#             if item[0] not in user_recent_songs:
+#                 recommended_songs[item[0]] = item[1]
+
+print(recommended_songs)
