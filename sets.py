@@ -307,3 +307,175 @@ for item in song_data.items():
 #                 recommended_songs[item[0]] = item[1]
 
 print(recommended_songs)
+
+# set difference:
+# similar to how we can find elements in commmon between sets, we can also find unique elements in one set.
+# `set` and `frozenset` use `difference()` method or `.` operator, this returns a `set` or `frozenset` which contains only elements from first set which are not found in second set
+# similar to other set operations type of first operand (set/frozenset on left side) will determine type of returning result(a set or frozenset)
+
+prepare_to_py = {'rock', 'heavy metal', 'electric', 'guitar', 'synth'}
+
+py_and_dry = frozenset({'classic', 'rock', 'jazz', 'electronic', 'guitar', 'rock and roll'})
+
+only_in_prepare_to_py = prepare_to_py.difference(py_and_dry)
+
+only_in_py_and_dry = py_and_dry.difference(prepare_to_py)
+
+print(only_in_prepare_to_py)
+print(only_in_py_and_dry)
+
+# this operation also supports an updating version of method, you can use `difference_update()` to update original `set` with result instead of returning a new `set` or `frozenset` object
+update_prepare_to_py = prepare_to_py.difference_update(py_and_dry)
+print(update_prepare_to_py) # returns None
+
+# update_py_and_dry = py_and_dry.difference_update(prepare_to_py)
+# print(update_py_and_dry) # will cause attribute error
+
+# exercise:
+song_data = {'Retro Words': ['pop', 'warm', 'happy', 'electronic', 'synth'],
+             'Wait For Limit': ['rap', 'upbeat', 'romance', 'relationship'],
+             'Stomping Cue': ['country', 'fiddle', 'party'],
+             'Lowkey Space': ['electronic', 'dance', 'synth', 'upbeat'],
+             'Back To Art': ['pop', 'sad', 'emotional', 'relationship'],
+             'Blinding Era': ['rap', 'intense', 'moving', 'fast'],
+             'Down To Green Hills': ['country', 'relaxing', 'vocal', 'emotional'],
+             'Double Lights': ['electronic', 'chill', 'relaxing', 'piano', 'synth']}
+
+user_liked_song = {'Back To Art': ['pop', 'sad', 'emotional', 'relationship']}
+user_disliked_song = {'Retro Words': ['pop', 'warm', 'happy', 'electronic', 'synth']}
+
+# Write your code below!
+tag_diff = set(user_liked_song['Back To Art']).difference(set(user_disliked_song['Retro Words']))
+print(tag_diff, "tyhis")
+
+recommended_songs = {}
+
+# for item in song_data.items():
+#     # print(item, item[0], item[1])
+#     if item not in user_liked_song.items() and item not in user_disliked_song.items():
+#         # print(item[0], "?!")
+#         recommended_songs[item[0]] = item[1]
+
+# print(recommended_songs)
+
+# <loop through each song in song_data>
+for item in song_data.items():
+#  <loop through each tag in song_data for a specific song>
+    for tag in item[1]:
+        # print(tag)
+#   <if the tag is inside of tag_diff> 
+        if tag in tag_diff:
+#    <check if the user has not listened to the specific song in user_liked_song or user_disliked_song> 
+            if item[0] not in user_liked_song and item[0] not in user_disliked_song:
+        # <add the song and associated tags to recommended_songs>
+                recommended_songs[item[0]] = item[1]
+
+print(recommended_songs)
+
+# symmetric difference:
+# last set operation we will be looking at is symmetric difference, we can think of this operation as oppposite of intersection operation, a resulting set will include all elements from sets which are in one or other but not both, in other words elements that are unique to each set.
+
+# to perform this operation on `set` and `frozenset` containers, we can  use `symmetric_difference()` method or `^` operator
+# like other operators type of first operand (set/frozenset on left side) will determine type of returning result(a set or frozenset)
+
+prepare_to_py = {'rock', 'heavy metal', 'electric', 'guitar', 'synth'}
+
+py_and_dry = frozenset({'classical', 'rock', 'jazz', 'electronic', 'guitar', 'rock and roll'})
+
+only_in_prepare_to_py = prepare_to_py.symmetric_difference(py_and_dry)
+
+only_in_py_and_dry = py_and_dry^prepare_to_py
+
+print(only_in_prepare_to_py)
+print(only_in_py_and_dry)
+
+#  we can also update original `set` using this operation by using `symmetric_difference_update()` method to update original `set` with result instead of returning a new `set` or `frozenset` object
+
+# exercise:
+user_song_history = {'Retro Words': ['pop', 'warm', 'happy', 'electronic', 'synth'],
+                     'Stomping Cue': ['country', 'fiddle', 'party'],
+                     'Back To Art': ['pop', 'sad', 'emotional', 'relationship'],
+                     'Double Lights': ['electronic', 'chill', 'relaxing', 'piano', 'synth']}
+
+friend_song_history = {'Lowkey Space': ['electronic', 'dance', 'synth', 'upbeat'],
+                     'Blinding Era': ['rap', 'intense', 'moving', 'fast'],
+                     'Wait For Limit': ['rap', 'upbeat', 'romance', 'relationship'],
+                     'Double Lights': ['electronic', 'chill', 'relaxing', 'piano', 'synth']}
+
+# Write your code below!
+user_tags = set()
+
+# for item in user_song_history:
+#     user_tags = user_tags.union(set(user_song_history[item]))
+
+# friend_tags = set()
+
+# for item in friend_song_history:
+#     friend_tags = friend_tags.union(set(friend_song_history[item]))
+
+# common_tags = user_tags.intersection(friend_tags)
+
+# user_tags.difference_update(common_tags)
+# friend_tags.difference_update(common_tags)
+
+# print(user_tags)
+# print(friend_tags)
+
+for item in user_song_history.items():
+    user_tags = user_tags.union(set(item[1]))
+
+friend_tags = set()
+
+for item in friend_song_history.items():
+    friend_tags = friend_tags.union(set(item[1]))
+
+unique_tags = user_tags.symmetric_difference(friend_tags)
+
+print(unique_tags)
+
+# sets review: we looked at
+# Creating `set` or `frozenset`:
+    # for `set` containers we can use curly braces {} or `set()` constructor
+    # for `frozenset` containers we can use `frozenset()` constructor
+
+# adding items to set:
+    # we can add item to `set` individually using `add()` method
+    # we can add multiple items to `set` using `update()` method
+
+# removing items from set:
+    # we can remove item from `set` individually using `remove()` method
+    # `discard()` method can also be used to remove elements from a `set`, it does not throw a `KeyError` if element is not found
+
+# finding elements:
+    # `in` keyword can be used with `set` and `frozenset` containers to test if an element exists inside of them
+
+# union:
+    # a union van be found using `set` or `frozenset` containers with `union()` method or `|` operator
+
+# intersection:
+    # an intersection can be found using `set` or `frozenset` containers with `intersection()` method or `&` operator
+
+# Difference:
+    # a difference can be found using `set` or `frozenset` containers with `difference()` method or `-` operator
+
+# symmetric difference:
+    # a symmetric difference can be found using `set` or `frozenset` containers with `symmetric_difference()` method or `^` operator
+
+# exercise:
+music_tags = {'pop', 'warm', 'happy', 'electronic', 'synth', 'dance', 'upbeat'}
+
+# Write your code below!
+my_tags = frozenset({'pop', 'electronic', 'relaxing', 'slow', 'synth'})
+
+frozen_tag_union = my_tags.union(music_tags)
+
+regular_tag_intersect = music_tags.intersection(my_tags)
+
+frozen_tag_difference = my_tags.difference(music_tags)
+
+regular_tag_sd = music_tags.symmetric_difference(my_tags)
+
+print(frozen_tag_union)
+print(regular_tag_intersect)
+print(frozen_tag_difference)
+print(regular_tag_sd)
