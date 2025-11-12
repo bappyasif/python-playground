@@ -91,7 +91,7 @@ for bug in loaded_bug_reports:
     else:
         bug_data.append(bug)
 
-next_bugs_to_fix = bug_data.pop(0) # This will remove the first element from the list and return it
+# next_bugs_to_fix = bug_data.pop(0) # This will remove the first element from the list and return it
 
 # observations:
 # problem with this implementation is that lists are not optimized for appending and popping large amounts of data, although they are great at accessing data at any index which you might need
@@ -112,7 +112,7 @@ for bug in loaded_bug_reports:
         bug_data.append(bug)
 
 # with a deque we can pop directly from front
-next_bugs_to_fix = bug_data.popleft()
+# next_bugs_to_fix = bug_data.popleft()
 
 # exercise:
 import csv
@@ -203,3 +203,143 @@ for item in clothes:
     updated_clothes_data.append(new_item)
 
 print(updated_clothes_data)
+
+# defaultdict
+# dicrtionaries are another popular type of collection we use in our programs. although they are great for a lot of situations, applications that rely heavily on them always run into a common issue, this isuue deals with how to handle missing keys
+# when we try to access a key-value pair in a dictionary but key doesnt exist, a dictionary will normally throw a KeyError
+prices = {'t-shirt': 9.99, 'pants': 14.99, 'jacket': 19.99}
+# print(prices['shoes']) # KeyError: 'shoes'
+
+# dealing with frequent KeyError exceptions can be quite cumbersome and in certain cases it might be better to avoid throwing an error. one way pyhton offers to deal with this issue is by having a default missing value in dictionary and this is exactly what `defaultdict` does
+
+from collections import defaultdict
+
+validate_prices = defaultdict(lambda: 'No price assigned')
+
+print(validate_prices['shoes']) # No price assigned
+validate_prices['pants'] = 14.99
+print(validate_prices['pants']) # 14.99
+
+# notice following:
+    # we set default value for missing keys to 'No price assigned' using a lambda function
+    # anytime we try to access a key that doesnt exist it automatically updates our `defaultdict` object by creating new key-value pair using missing key and default value
+
+# exercise:
+site_locations = {'t-shirt': 'Shirts',
+                  'dress shirt': 'Shirts',
+                  'flannel shirt': 'Shirts',
+                  'sweatshirt': 'Shirts',
+                  'jeans': 'Pants',
+                  'dress pants': 'Pants',
+                  'cropped pants': 'Pants',
+                  'leggings': 'Pants'
+                  }
+updated_products = ['draped blouse', 'leggings', 'undershirt', 'dress shirt', 'jeans', 'sun dress', 'flannel shirt', 'cropped pants', 'dress pants', 't-shirt', 'camisole top', 'sweatshirt']
+
+# Write your code below!
+validated_locations = defaultdict(lambda: 'TODO: Add to website')
+
+validated_locations.update(site_locations)
+
+for product in updated_products:
+    site_locations[product] = validated_locations[product]
+
+print(site_locations)
+
+# orderdict
+# when keeping track of many different dictionaries with built in python containers we could try storing dictionaries in a list or even a dictionary of dictionaries. this may work in some cases but there are a few problems which might come up
+# when storing dictionaries in a list order is preserved but we have to access elements by their index before we can access dictionary
+
+first_order = {'order_2201': {'type': 'Shoes', 'size': 10, 'price': 19.99}}
+second_order = {'order_2202': {'type': 'pants', 'size': 'medium', 'price': 19.99}}
+thisr_order = {'order2203': {'type': 't-shirt', 'size': 'small', 'price': 9.99}}
+
+list_of_dicts = [first_order, second_order, thisr_order]
+
+print(list_of_dicts[0]['order_2201']['type']) # Shoes
+print(list_of_dicts[1]['order_2202']['price']) # 19.99
+
+# inorder to get price of a specif order we must know index of it before we can access dictionary data stored inside of it
+
+# on other hand depending on python version `dict` container can preserve order but it is difficult to move elements around
+dict_of_dicts = {}
+dict_of_dicts.update(first_order)
+dict_of_dicts.update(second_order)
+dict_of_dicts.update(thisr_order)
+
+print(dict_of_dicts['order_2201']['type']) # Shoes
+print(dict_of_dicts['order_2202']['price']) # 19.99
+
+# note `dict` class is unordered in earlier versions of python so implementing it this way must have version 3.6 or higher, to solve this issue we can make use of `OrderedDict` class from `collections` module
+
+# `OrderedDict` container allows us to access values using keys but it also preserves order of elements inside of it
+
+from collections import OrderedDict
+
+orders = OrderedDict()
+
+orders.update(first_order)
+orders.update(second_order)
+orders.update(thisr_order)
+orders.update({'order_2204': {'type': 'dress', 'size': 'medium', 'price': 19.99}})
+
+find_order = orders['order_2204'] # data can be accessed using keys like in a normal dictionary
+
+print(find_order)
+
+# order can be retrieved by converting it to a list then accessing by index
+orders_list = list(orders.items())
+third_order = orders_list[2]
+
+print(third_order)
+
+# when using an `OrderedDict` we are able to use its methods for moving data around, we can move an element to back or front and pop data from back or front of `OrderedDict`
+
+# move an item to end of OrderedDict
+orders.move_to_end('order_2201')
+print(orders)
+
+# pop last item
+last_order = orders.popitem(last=True)
+print(last_order)
+print(orders)
+
+# note these two methods also accept boolean arguments which determine if element is moved / popped from front or back of `OrderedDict`
+
+# exercise:
+# The first 15 orders are provided
+order_data = [['Order: 1', 'purchased'],
+              ['Order: 2', 'purchased'],
+              ['Order: 3', 'purchased'],
+              ['Order: 4', 'returned'],
+              ['Order: 5', 'purchased'],
+              ['Order: 6', 'canceled'],
+              ['Order: 7', 'returned'],
+              ['Order: 8', 'purchased'],
+              ['Order: 9', 'returned'],
+              ['Order: 10', 'canceled'],
+              ['Order: 11', 'purchased'],
+              ['Order: 12', 'returned'],
+              ['Order: 13', 'purchased'],
+              ['Order: 14', 'canceled'],
+              ['Order: 15', 'purchased']]
+
+# Write your code below!
+orders = OrderedDict(order_data)
+
+to_move = list()
+to_remove = list()
+
+for key, value in orders.items():
+    if value == 'returned':
+        to_move.append(key)
+    elif value == 'canceled':
+        to_remove.append(key)
+
+for order in to_remove:
+    orders.pop(order)
+
+for order in to_move:
+    orders.move_to_end(order)
+
+print(orders)
