@@ -343,3 +343,138 @@ for order in to_move:
     orders.move_to_end(order)
 
 print(orders)
+
+# chainmap
+# there is another way to store dictionaries or other mappings in pyhton, we have looked at `defaultdict` and `ordereddict` so far and they handle a lot of situations so what else could we possibly need?
+# `chainmap` container allows us to store many mappings in an ordered group but lookups(accessing values with key) are repeated for every mappings inside of chainmap until something is found or end is reached.
+# if we try to modify data in any way then only first mapping in `chainmap` will recieve changes when accessing data one way to think of `chainmap` will recieve changes.
+# when accessing data one way to think of `chainmap` is that it treats all of stored dictionaries as one large dictionary, where if there are repeated keys then first found result is returned
+
+from collections import ChainMap
+
+customer_info = {'name': 'john doe', 'age': 22, 'address': '123 main st', 'phone_number': '123-456-7890'}
+
+shirt_dimensions = {'shoulder': 20, 'chest': 40, 'torso_length': 29}
+
+pants_dimensions = {'waist': 31, 'leg_length': 40, 'hip': 22, 'thigh': 24, 'bottom': 18}
+
+# next we initialize a `chainmap` with mappings which we want to use, in this case mappings are dimensions of dictionaries
+customer_data = ChainMap(customer_info, shirt_dimensions, pants_dimensions)
+
+# now we can access values from any of these stored mappings using keys
+customer_leg_length = customer_data['leg_length']
+
+print(customer_leg_length) # 40
+
+# we can directly modify data only in first dictionary inside of `chainmap`
+customer_info['name'] = 'jane doe'
+
+print(customer_data['name'])
+
+customer_info['address'] = '456 main st'
+
+print(customer_data['address'])
+
+# in order to modify data from dictionaries which are deeper in `chainMap` we will need to iterate through dictionaries which are stored inside of it
+
+# as we can see in this example above we create a new `ChainMap` using three different dictionaries, this allows us to access any of `key:value` pairs stored inside
+
+# another interesting concept that `chainMap` uses is concept of a parent mappings, if we use `.parents` property all mappings except first one will be returned. this is because those mappings are considered to be parent mappings of first one. you can add a new child mapping to front of list mappings using `.new_child()` method
+
+# exercise:
+year_profit_data = [
+    {'jan_profit': 15492.30, 'jan_holiday_profit': 2589.12},
+    {'feb_profit': 17018.05, 'feb_holiday_profit': 3701.88},
+    {'mar_profit': 11849.13},
+    {'apr_profit': 9870.68},
+    {'may_profit': 13662.34},
+    {'jun_profit': 12903.54},
+    {'jul_profit': 16965.08, 'jul_holiday_profit': 4360.21},
+    {'aug_profit': 17685.69},
+    {'sep_profit': 9815.57},
+    {'oct_profit': 10318.28},
+    {'nov_profit': 23295.43, 'nov_holiday_profit': 9896.55},
+    {'dec_profit': 21920.19, 'dec_holiday_profit': 8060.79}
+]
+
+new_months_data = [
+    {'jan_profit': 13977.85, 'jan_holiday_profit': 2176.43},
+    {'feb_profit': 16692.15, 'feb_holiday_profit': 3239.74},
+    {'mar_profit': 17524.35, 'mar_holiday_profit': 4301.92}
+]
+
+# Write your code below!
+profit_map = ChainMap(*year_profit_data)
+
+# def get_profits():
+#     last_year_standard_profit = 0
+#     last_year_holiday_profit = 0
+#     for key, values in profit_map.items():
+#         # print(key, values, 'iter')
+#         if 'holiday' in key:
+#             last_year_holiday_profit += values
+#         else:
+#             last_year_standard_profit += values
+
+#     print(last_year_standard_profit, last_year_holiday_profit)
+#     return last_year_standard_profit, last_year_holiday_profit
+
+# def get_profits(year_profit_data):
+#     last_year_standard_profit = 0
+#     last_year_holiday_profit = 0
+#     for item in year_profit_data:
+#         # print(item, 'iter')
+#         for key, values in item.items():
+#             # print(key, values, 'iter')
+#             if 'holiday' in key:
+#                 last_year_holiday_profit += values
+#             else:
+#                 last_year_standard_profit += values
+
+#     print(last_year_standard_profit, last_year_holiday_profit)
+#     return last_year_standard_profit, last_year_holiday_profit
+
+# get_profits(year_profit_data)
+
+# When creating this function, you can loop through each of the keys in the ChainMap since it is treated like one big dictionary. If 'holiday' is in the key, then add the value to the total count for the holiday profit, otherwise add the value to the standard profit. remember to return both values.
+
+def get_profits(input_map):
+    total_standard_profit = 0
+    total_holiday_profit = 0
+    for key in input_map.keys():
+        # print(key, values, 'iter')
+        if 'holiday' in key:
+            total_holiday_profit += input_map[key]
+        else:
+            total_standard_profit += input_map[key]
+
+    print(total_standard_profit, total_holiday_profit)
+    return total_standard_profit, total_holiday_profit
+
+last_year_standard_profit, last_year_holiday_profit = get_profits(profit_map)
+
+current_year_standard_profit, current_year_holiday_profit = get_profits(ChainMap(profit_map, *new_months_data))
+
+# profit_map was not updated correctly with the new data from new_months_data. Expected 15 dictionaries to be stored, but got 12
+
+# we can add new data to `ChainMap` using `.new_child` method
+
+# exercise:
+# Write your code below!
+# current_year_standard_profit, current_year_holiday_profit = get_profits(profit_map.new_child(new_months_data)) # getting unhashable type: dict error
+
+# current_year_standard_profit, current_year_holiday_profit = get_profits(profit_map.new_child(ChainMap(*new_months_data))) #profit_map was not updated correctly with the new data from new_months_data. Expected 15 dictionaries to be stored, but got 12
+
+# current_year_standard_profit, current_year_holiday_profit = get_profits(ChainMap(profit_map, *new_months_data)) # profit_map was not updated correctly with the new data from new_months_data. Expected 15 dictionaries to be stored, but got 12
+
+for item in new_months_data:
+    profit_map = profit_map.new_child(item)
+
+current_year_standard_profit, current_year_holiday_profit = get_profits(profit_map)
+
+print(current_year_standard_profit, current_year_holiday_profit)
+
+year_diff_standard_profit = current_year_standard_profit - last_year_standard_profit
+year_diff_holiday_profit = current_year_holiday_profit - last_year_holiday_profit
+
+print(year_diff_standard_profit, year_diff_holiday_profit)
