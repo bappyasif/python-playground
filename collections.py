@@ -478,3 +478,97 @@ year_diff_standard_profit = current_year_standard_profit - last_year_standard_pr
 year_diff_holiday_profit = current_year_holiday_profit - last_year_holiday_profit
 
 print(year_diff_standard_profit, year_diff_holiday_profit)
+
+# Counter
+# one of most common tasks we might have to do in a program is to count instances of an element in a collection. below we will examine a python list and look at one particular way we count elements and then see how `collections` module allows us to improve upon our implementation using `counter` collection
+
+clothes_list = ['skirt', 'hoodie', 'dress', 'blouse', 'jeans', 'shoes', 'skirt', 'skirt', 'jeans', 'hoodie', 'boots', 'jeans', 'jacket', 't-shirt', 'skirt', 'skirt', 'dress', 'shoes', 'blouse', 'hoodie', 'skirt', 'boots', 'shoes', 'boots', 'jeans', 'hoodie', 'blouse', 'hoodie', 'shoes', 'shoes', 'blouse', 'boots', 'blouse', 'hoodie', 't-shirt', 'jeans', 'dress', 'skirt', 'jacket', 'boots', 'skirt', 'dress', 'jeans', 'jeans', 'jacket', 'jeans', 'shoes', 'dress', 'hoodie', 'blouse']
+
+# if we wanted to create a representation of how many of each item exists in our collection we could use a loop and a dictionary to do just that
+
+counted_items = {}
+
+for item in clothes_list:
+    if item in counted_items:
+        counted_items[item] += 1
+    else:
+        counted_items[item] = 1
+
+print(counted_items)
+
+# while this is perfectly sound solution to our counting problem we can actually accomplish this much wuicker using `Counter` container
+# `counter` container instantly counts elements for any hashable object, it stores data as a dictionary where keys are elements and values are counts of occurances
+
+from collections import Counter
+
+counted_items = Counter(clothes_list)
+
+print(counted_items)
+
+# this above approach allows us to create a much more elegant solution without many lines of code. additionally `Counter` class has methods that provide further utility when working with our data, these methods include mathematical operations for subtracting one count dictionary from another finding most common elements and even generating a new list of elements based on number of occurrences
+
+# exercise:
+opening_inventory = ['shoes', 'shoes', 'skirt', 'jeans', 'blouse', 'shoes', 't-shirt', 'dress', 'jeans', 'blouse', 'skirt', 'skirt', 'shorts', 'jeans', 'dress', 't-shirt', 'dress', 'blouse', 't-shirt', 'dress', 'dress', 'dress', 'jeans', 'dress', 'blouse']
+
+closing_inventory = ['shoes', 'skirt', 'jeans', 'blouse', 'dress', 'skirt', 'shorts', 'jeans', 'dress', 'dress', 'jeans', 'dress', 'blouse']
+
+# Write your code below!
+def find_amount_sold(opening, closing, item):
+    opening_count = Counter(opening)
+    closing_count = Counter(closing)
+    opening_count.subtract(closing_count)
+    # diff_count = opening_count.subtract(closing_count)
+    # return diff_count[item] # typeerror 'NoneType' object is not subscriptable
+    # return diff_count[item]
+    return opening_count[item]
+
+print(find_amount_sold(opening_inventory, closing_inventory, 'dress')) 
+
+tshirts_sold = find_amount_sold(opening_inventory, closing_inventory, 't-shirt')
+
+print(tshirts_sold)
+
+
+# container wrappers:
+# in python wrappers are modifications to functions or classes which change behavior in some way, they are called wrappers because they wrap around existing code to modify it. this is most commonly used with function wrapping but we can also wrap classes
+
+# first we need a class to wrap around
+class Customer:
+    def __init__(self, name, age, address, phone_number):
+        self.name = name
+        self.age = age
+        self.address = address
+        self.phone_number = phone_number
+
+    
+# next we create a wrapper class which stores an object of class we are wrapping around, it also includes some additional functionality
+
+class CustomerWrap(Customer):
+
+    def __init__(self, name, age, address, phone_number):
+        self.customer = Customer(name, age, address, phone_number)
+
+    def display_customer_info(self):
+        print(f'Name: {self.customer.name}')
+        print(f'Age: '+ str(self.customer.age))
+        print(f'Address: {self.customer.address}')
+        print(f'Phone Number: {self.customer.phone_number}')
+
+# finally we can create an object from wrapper class to access new functionality and wrapped class contained inside.
+
+customer = CustomerWrap('john doe', 22, '123 main st', '123-456-7890')
+
+customer.display_customer_info()
+
+# wrapper class allows us to create different variations of classes with different purposes while avoiding code duplication
+# since we use an instance of wrapped class inside of it, it preserves all of attributes and methods from wrapped class and keeps us from having to re-type all code
+
+# in case of containers `collections` class has three different wrappers set up for us to modify! because of this we can refer to them as wrapper containers. advanced containers which we have already been looking at variations of standard built-in containers, so using wrapper containers allows us to create our own versions as well
+
+# three wrapper containers we will be looking at are:
+
+# 1. `UserDict` class which is a wrapper for `dict` class
+
+# 2. `UserList` class which is a wrapper for `list` class
+
+# 3. `UserString` class which is a wrapper for `str` class
