@@ -572,3 +572,97 @@ customer.display_customer_info()
 # 2. `UserList` class which is a wrapper for `list` class
 
 # 3. `UserString` class which is a wrapper for `str` class
+
+
+# UserDict:
+# in this lesson we have seen advanced containers which modify functionality of a dictionary such as `defaultdict` or `orderedDict`
+# `UserDict` container wrapper lets us create our own version of a dictionary. this class contains all of functionality of a normal `dict` except that we can access dictionary data through `data` property, here's an example of creating a modified dictionary:
+from collections import UserDict
+
+# create a class which inherits from UserDict class
+class DisplayDict(UserDict):
+    # a new method to increase dictionary's functionality
+    def display_info(self):
+        print("Number of keys: "+ str(len(self.keys())))
+        print("Keys: "+ str(list(self.keys())))
+        print("Number of values: "+ str(len(self.values())))
+        print("Values: "+ str(list(self.values())))
+
+    # we can also overwrite a method from dictionary class
+    
+    def clear(self):
+        print("Deleting all items from dictionary")
+        super().clear()
+
+disp_dict = DisplayDict({'name': 'john doe', 'age': 22, 'address': '123 main st'})
+
+disp_dict.display_info()
+
+disp_dict.clear()
+
+disp_dict.display_info()
+
+# as shown in this code example we can add additional methods and overwrite methods from `UserDict` class. this is same as inheriting from regular python classes
+
+# exercise:
+data = {'order_4829': {'type': 't-shirt', 'size': 'large', 'price': 9.99, 'order_status': 'processing'},
+        'order_6184': {'type': 'pants', 'size': 'medium', 'price': 14.99, 'order_status': 'complete'},
+        'order_2905': {'type': 'shoes', 'size': 12, 'price': 22.50, 'order_status': 'complete'},
+        'order_7378': {'type': 'jacket', 'size': 'large', 'price': 24.99, 'order_status': 'processing'}}
+
+# Write your code
+class OrderProcessingDict(UserDict):
+
+    def clean_orders(self):
+        for order in list(self.keys()):
+            if self[order]['order_status'] == 'complete':
+                self.pop(order)
+
+order_dict = OrderProcessingDict(data)
+order_dict.clean_orders()
+print(order_dict)
+
+
+# UserDict:
+# not only can we create our own version of a dictionary, `UserList` wrapper conrtainer lets us create our own `list` as well
+# this class contains all of functionality of a regular `list` but it also has a property called `data` which allows us to access list contents directly.
+
+from collections import UserList
+
+# create a class which inherits from UserList class
+class CondenseList(UserList):
+
+    # a new method to remove duplicate items from list
+    def condense(self):
+        self.data = list(set(self.data))
+        print(self.data)
+
+    # we can also overwrite a method from list class
+    def clear(self):
+        print("Deleting all items from list")
+        super().clear()
+
+condense_list = CondenseList(['t-shirt', 'jeans', 'jeans', 't-shirt', 'shoes'])
+print(condense_list)
+
+condense_list.condense()
+
+condense_list.clear()
+
+print(condense_list)
+
+# exercise:
+data = [4, 6, 8, 9, 5, 7, 3, 1, 0]
+
+# Write your code below!
+class ListSorter(UserList):
+
+    def append(self, value):
+        # append new value
+        self.data.append(value)
+        # then sort list
+        self.data.sort()
+
+sorted_list = ListSorter(data)
+sorted_list.append(2)
+print(sorted_list)
