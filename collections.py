@@ -666,3 +666,132 @@ class ListSorter(UserList):
 sorted_list = ListSorter(data)
 sorted_list.append(2)
 print(sorted_list)
+
+# UserString:
+# since strings are also considered containers `collections` module also provides a container wrapper for string class. this contains all of functionality of a regular string but it inlcudes string's data inside of a property called `data`. inheriting from `UserString` class allows us to create ourown version of a string
+
+from collections import UserString
+
+class IntenseString(UserString):
+    # a new method to capitalize and add exclamations mark to string
+    def exclaim(self):
+        self.data = self.data.upper() + "!!!!"
+        return self.data
+    
+    # overwrote count method to only count a certain metter
+    def count(self, sub=None, start=0, end=0):
+        num = 0
+        for letter in self.data:
+            if letter == 'P':
+                num += 1
+        return num
+    
+intense_string = IntenseString("hello world")
+print(intense_string.exclaim())
+print(intense_string.count("P"))
+
+
+# exercise:
+str_name = 'python powered patterned products'
+str_word = 'patterned '
+
+# Write your code below!
+class SubtractString(UserString):
+
+    def __sub__(self, other):
+        self.data = self.data.replace(other, '')
+        return self.data
+
+sub_str = SubtractString(str_name)
+print(sub_str - str_word)
+
+
+# review of specialized containers
+# we have learned about all sorts of advanced containers which can help make programming easier, more organized and more optimized
+# we even learned how to make our own advanced containers using container wrappers
+# `deque`
+  # an advanced container which is optimized for appending and popping items from front and back. for accessing many elements positioned elsewhere it's better to use a `list`
+
+# `namedtuple`
+    # this advanced container automatically counts data within a hashable object which we pass into it's constructor. it stores it as a dictionary where keys are elements and values are number of occurances
+
+# `defaultdict`
+    # an advanced container which behaves like a regular dictionary except that it does not throw an error when trying to access a key which does not exist, instead iot creates a new `key:value` pair where value defaults to what we provide in constructor for `defaultdict`
+
+# `OrderedDict`
+    # `OrderedDict` combines functionality of a `list` and a `dict` by preserving order of elements but also allowing us to access values using keys without having to provide an index for position of stored dictionaries
+
+# `ChainMap`
+    # this interesting container combines multiple mappings into a single container, when accessing a value using a key, it will search through every mapping contained within until a match is found or end is reached, it also provides some useful methods for grouping parent and child mappings.
+
+# `UserDict`
+    # this is a container wrapper which lets us create our own version of a dictionary
+
+# `UserList`
+    # this is a container wrapper which lets us create our own version of a list
+
+# `UserString`
+    # this is a container wrapper which lets us create our own version of a string
+
+# lets try combining some of these concepts in an exercise:
+
+overstock_items = [['shirt_103985', 15.99],
+                    ['pants_906841', 19.99],
+                    ['pants_765321', 15.99],
+                    ['shoes_948059', 29.99],
+                    ['shoes_356864', 9.99],
+                    ['shirt_865327', 10.99],
+                    ['shorts_086853', 9.99],
+                    ['pants_267953', 21.99],
+                    ['dress_976264', 32.99],
+                    ['shoes_135786', 17.99],
+                    ['skirt_196543', 12.99],
+                    ['jacket_976535', 26.99],
+                    ['pants_086367', 30.99],
+                    ['dress_357896', 29.99],
+                    ['shoes_157895', 14.99]]
+
+# Write your code below!
+split_prices = deque()
+
+for row in overstock_items:
+    if row[1] > 20:
+        split_prices.appendleft(row)
+    else:
+        split_prices.append(row)
+
+print(split_prices)
+
+# namedtuple subclass ClothesBundle
+ClothesBundle = namedtuple('ClothesBundle', ['bundle_items', 'bundle_price'])
+
+# First, create an empty list called bundles. Use a loop to continue iterating as long as there are at least 5 elements left in split_prices.
+
+# On each iteration, append a new ClothesBundle object to the bundles list. The ClothesBundle object will be created by making a bundle of three cheap items and two expensive items. This can be accomplished using a new list by popping from the back of split_prices three times, and then popping from the front of split_prices twice.
+
+# Use that list of clothes items as the bundle_items in theClothesBundle. Calculate the sum of the prices for the bundle and store that as the bundle_price in the ClothesBundle.
+
+bundles = list()
+
+while len(split_prices) >= 5:
+    bundle_items = list()
+    bundle_items.append(split_prices.pop())
+    bundle_items.append(split_prices.pop())
+    bundle_items.append(split_prices.pop())
+    bundle_items.append(split_prices.popleft())
+    bundle_items.append(split_prices.popleft())
+    bundle_price = 0
+    for item in bundle_items:
+        bundle_price += item[1]
+
+    bundles.append(ClothesBundle(bundle_items=bundle_items, bundle_price=bundle_price))
+
+print(bundles)
+
+promoted_bundles = list()
+
+for bundle in bundles:
+    if bundle.bundle_price > 100:
+        promoted_bundles.append(bundle)
+
+print(promoted_bundles)
