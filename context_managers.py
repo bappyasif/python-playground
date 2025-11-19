@@ -233,3 +233,290 @@ class PoemFiles:
 with PoemFiles('data/poem.txt', 'r') as file2:
   print(file2.read())
   print("---- Exception data below ----")
+
+
+# handling exceptions II:
+# printing exceptions isnt only way can handle them in `__exit__` method, an exception that occurs in a context manager can be handled in two ways
+   # 1. if we want to throw an error when an error occurs we can either:
+      # return`False` after `close` method is called
+      # or do nothing and let the error propagate
+   # 2. if we want to suppress an error, we can:
+      # return `True` after `close` method is called
+
+# lets see how to do that
+class OpenFile:
+
+   def __init__(self, file, mode):
+      self.file = file
+      self.mode = mode
+
+   def __enter__(self):
+      self.opened_file = open(self.file, self.mode)
+      return self.opened_file
+   
+   def __exit__(self, exc_type, exc_value, traceback):
+      print(exc_type, exc_value, traceback)
+      print("Exception has been handled")
+      self.opened_file.close()
+      return True
+   
+# notice above that nothing changed except for adding of `retrun True` to implement suppression of an error. To see this in action, we'll call two `with` statements using this context manager, one that wil throw an exception and another that will not
+
+with OpenFile('data/somefile.txt', 'r') as file:
+   # .see() # intentional error: AttributeError
+   print("---- Exception data below ----")
+   file.see()
+   print(file.see())
+
+
+with OpenFile('data/somefile.txt', 'r') as file2:
+   file2.read()
+
+# here's what we see:
+   # error message we manually coded is printed but there is no automatic error message thrown by program
+   # both `with` statements ran
+
+# if we did not return `True` second and all proceeding `with` statements would not have run since an exception would be hit
+# additionally we can choose to handle a specific exception while suppresssing it. this is useful if we want our context manager to not block execution of other code but also customize output if a certain exception occurs.
+# here is an example of working with a TypeError
+
+class OpenFile:
+
+   def __init__(self, file, mode):
+      self.file = file
+      self.mode = mode
+
+   def __enter__(self):
+      self.opened_file = open(self.file, self.mode)
+      return self.opened_file
+   
+   def __exit__(self, exc_type, exc_value, traceback):
+      self.file.close()
+      if isinstance(exc_value, TypeError):
+         print("TypeError has been handled")
+         return True
+
+# notice `if` statement that compares `exc_value` to a specific exception we are trying to catch. anything we want to happen for this specific exception can occur in conditional code block. lastly we return `True` to make sure we suppress exception from arising and stopping rest of our code from running
+
+# cause for an typerror
+# with OpenFile('data/somefile.txt', 'r') as file:
+#    # file.read() # intentional error: TypeError
+#    print("---- Exception data below this ----")
+#    file.read()
+
+# remember that `__exit__()` method's primary responsibility is to close resource context manager is working with. in this example, we close file first before handling error so that it will always run
+
+# exercise:
+class PoemFiles:
+
+  def __init__(self, poem_file, mode):
+    print(' \n -- Starting up a poem context manager -- \n')
+    self.file = poem_file
+    self.mode = mode
+
+  def __enter__(self):
+    print(' \n --  Opening poem file -- \n')
+    self.opened_poem_file = open(self.file, self.mode)
+    return self.opened_poem_file
+
+  def __exit__(self, exc_type, exc_value, traceback):
+    print(exc_type, exc_value, traceback, '\n')
+    # Write your code below: 
+    self.opened_poem_file.close()
+    if isinstance(exc_value, AttributeError):
+      return True
+    
+
+with PoemFiles('data/poem.txt', 'r') as file:
+  print("---- Exception data below ---- \n ")
+  print(file.uppercasewords())
+
+with PoemFiles('data/poem.txt', 'r') as file2:
+  print(file2.read())
+  print(" \n ---- Exception data below ---- \n ")
+
+
+# Contextlib introduction:
+# we have learned that we can create our own context managers using class based method but there's an even simpler way of creating context managers. we can use a built in python module called `contextlib` 
+
+# `contextlib` module allows for creation of a colntext manager with use of a generator function(a function that uses `yield` instead of `return`) and contextlib decorator `@contextmanager`
+# instead of creating a class and defining `__enter__` and `__exit__` methods, we can use `@contextmanager` decorator function to create a context manager
+
+# there are few steps in setup so lets take it slow and break it down each step, first we''ll need to import built-in module into our script and grab `@contextmanager` decorator
+
+from contextlib import contextmanager
+# once we have successfully imported module we can automatically use `@contextmanager` decorator to wrap a simple generator function
+
+@contextmanager
+def open_file_contexxtlib(file, mode):
+   opened_file = open(file, mode)
+
+   try:
+      yield opened_file
+   finally:
+      opened_file.close()
+
+# we are doing a few things here
+   # we have written a generator function called `open_file_contextlib` with expectation that it will take two arguments a file and a mode
+   # we then used built-in `open()` function to open a file that we recieved as an argument and save it to a variable called `opened_file`
+   # function then will attempt via a `try` statement to yield opened file and complete whatever code we pass to it when we use it in conjunction with `with` statement
+   # lastly resource (file) will be closed once all code is done executing
+
+# if we think about this structure in sections relative to class based approach, it essentially breaks down into this:
+# @contextmanager
+# def generator_name(<parameters>):
+#    <setup section - equivalent to __enter__>
+#    try:
+#       yield <return value>
+#    finally:
+#       <cleanup section - equivalent to __exit__>
+
+# once we have created this function and denoted it as a context manager using `@contextmanager` decorator, we can immediately use it like before in a `with` statement
+with open_file_contexxtlib('data/somefile.txt', 'w') as file:
+   file.write('some text, We just made a context manager using contexlib!')
+
+# following this pattern of creating context managers allows us to quickly convert generator functions to become context managers without need of to create any extra classes. now lets remake our poem context managers following this pattern
+
+# exercise
+@contextmanager
+def poem_files(file, mode):
+  print("Opening File")
+  open_poem_file = open(file, mode)
+  try:
+    yield open_poem_file
+  finally:
+    print("Closing File")
+    open_poem_file.close()
+
+with poem_files('data/poem.txt', 'a') as opened_file:
+ print('Inside yield')
+ opened_file.write('Rose is beautiful, Just like you.')
+
+# contextlib error handling:
+# in previous exercise we explored how to create a context manager using `contextlib` module. however we didnt go over to deal with errors just as we did with class based approach.
+# like anyother pattern you may run into error when invoking your context manager using @contextmanager decorator.
+
+# for class based context manager `__exit__` method dealt with exceptions, for decorator method errors are most commonly dealt with within an `except` block. we will build on top of our `try/finally` block by incorporating `except`, there are two main ways to handle errors when using `contextlib` module:
+   # 1. to throw an error and stop execution of our entire program, we can:
+      # simply do nothing by excluding an `except` block
+   # 2. to catch errors and continue execution our program, we can:
+      # handle exception in an `except` block
+
+@contextmanager
+def open_file_contextlib(file, mode):
+   open_file = open(file, mode)
+
+   try:
+      yield open_file
+
+      # exception handling
+   except Exception as exception:
+      print("We hit an exception: ", exception)
+   finally:
+      open_file.close()
+
+with open_file_contextlib('data/somefile.txt', 'w') as file:
+   # file.write('some text, We just made a context manager using contexlib!')  # this okay
+   file.sign('some text, We just made a context manager using contexlib!')  # this will throw an error
+
+# observations:
+# inclusion of `except` clause
+# `except` attempts to catch a generic exception, if its hit it save it to a variable called `exception`, note we can use any exception object, not just a generic one, if we know what type of exception is being thrown we can use that instead
+# handler print out a message and continue execution of our program
+
+# with this context manager is called in `with` statement above, it will hit exception block because `.sign ()` is not a file method, and that tells us what our error is, so we know how to fix it.
+
+# exercise
+@contextmanager
+def poem_files(file, mode):
+  print('Opening File')
+  open_poem_file = open(file, mode)
+  try:
+    yield open_poem_file
+  #Write your code below: 
+  except AttributeError as e:
+    print(e)
+
+  finally:
+    print('Closing File')
+    open_poem_file.close()
+
+with poem_files('data/poem.txt', 'a') as opened_file:
+ print('Inside yield')
+ opened_file.sign('Buzz is big city. big city is buzz.')
+
+# nested context managers:
+# so far we have only been using context managers within context of one file. in most programs there might be a need to use context managers for a couple of different scenarios that include working with multiple files, for example we might want to:
+   # work with information from multiple files
+   # copy same information to multiple files
+   # copy information from one file to another
+# to accomplish this goal of working with multiple resources at once, context managers can be nested together in a `with` statement to manage multiple resources simultaneously 
+
+# lets imagine we have two files: `teacher.txt` and `student.txt` and we want to copy information from one to the other
+# with open('data/teacher.txt', 'w') as teacher_file, open('data/student.txt', 'w') as student_file:
+#    teacher_file.write(student_file.read())
+
+# notice:
+# `with` statement is being called once but invoking two context managers, this is a single line nested `with` statement
+# each context manager is separated by a comma and has its own target variable
+# our `teacher.txt` is opened in write mode because it will be written into and our `student.txt` is opened in read mode because we are attempting to copy text into teacher's file
+# teacher.txt file will now include everything that was in student.txt file
+# here we have chosen to use `open` built-in function rather than a custom context manager. it is entirely possible to use our own in place of `open` function as well
+
+# we can also write above `nested` context managers in a slightly different way:
+# with open('data/teacher.txt', 'w') as teacher_file:
+#    with open('data/student.txt', 'r') as student_file:
+#       teacher_file.write(student_file.read())
+
+# notice this syntax is almost similar to first method however there are some differences:
+   # `with` statement is called twice
+   # `with` statement to open `student.txt` in read mode is nested in code block of `with` statement that opens `teacher.txt` in write mode
+   # this method, though slightly longer gives a clearer visual of nesting and is preferable when working with multiple context managers
+
+# exercise:
+@contextmanager
+def poem_files(file, mode):
+  print('Opening File')
+  open_poem_file = open(file, mode)
+  try:
+    yield open_poem_file
+  finally:
+    print('Closing File')
+    open_poem_file.close()
+
+
+@contextmanager
+def card_files(file, mode):
+  print('Opening File')
+  open_card_file = open(file, mode)
+  try:
+    yield open_card_file
+  finally:
+    print('Closing File')
+    open_card_file.close()
+
+# Write your code below: 
+# with card_files('data/card.txt', 'w') as card_file, poem_files('data/poem.txt', 'a') as poem_file:
+#   card_file.write(poem_file.read())
+with poem_files("data/poem.txt", "r") as poem: 
+  with card_files("data/card.txt", "w") as card:
+    print(poem)
+    print(card)
+    card.write(poem.read())
+
+# review:
+# we have explored many of core concepts behind context managers.
+# context managers:
+   # context managers are a form of resource management in python invoked by `with` statement 
+   # they ensure that resources are closed/released after usage regardless opf whether or not an error occurs
+   # they can be created from scratch using either class-based method or `contextlib` decorator based method
+   # behind every contetx managre there's an `__enter__` and `__exit__` method taking place
+   # context managers can be nested together to work with resources simultaneously
+
+# class based context managers:
+   # they can be created from scratch with manual implementation of `__enter__` and `__exit__` method
+   # `__exit__` method takes three arguments: an exception type, an exception value and a traceback object, method can then handle exceptions
+
+# decorator based context managers:
+   # they can be created from scratch using `contextlib` module decorator `@contextmanager`
+   # `contextlib` method `except` block handles exceptions code block
