@@ -1,1 +1,0 @@
-some texts are here to read by python!!
