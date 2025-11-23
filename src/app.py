@@ -1,121 +1,54 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, File, UploadFile, Depends, Form
 
-from src.schemas import PostCreate, PostResponse
+from src.db import get_async_session, create_db_and_tables, Post
 
-from typing import List, Dict
+from sqlalchemy.ext.asyncio import AsyncSession
 
-app = FastAPI()
+from contextlib import asynccontextmanager
 
-posts = {
-    1: {
-        "title": "title of post 1",
-        "content": "content of post 1",
-        "id": 1
-    },
-    2: {
-        "title": "title of post 2",
-        "content": "content of post 2",
-        "id": 2
-    },
-    3: {
-        "title": "title of post 3",
-        "content": "content of post 3",
-        "id": 3
-    },
-    4: {
-        "title": "title of post 4",
-        "content": "content of post 4",
-        "id": 4
-    },
-    5: {
-        "title": "title of post 5",
-        "content": "content of post 5",
-        "id": 5
-    },
-    6: {
-        "title": "title of post 6",
-        "content": "content of post 6",
-        "id": 6
-    }
-}
+from sqlalchemy import select
 
-# this is a much better typed version where return response is also typed for fastapi docs
-@app.post("/create-a-post")
-def create_a_post(post: PostCreate) -> PostResponse:
-    new_post = {"title": post.title, "content": post.content, "id": len(posts) + 1}
-    posts[max(posts.keys()) + 1] = new_post
-    return new_post
-    # return "wrong" # this will not work as the return type is PostResponse anything other than PostResponse will not work
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await create_db_and_tables()
+    yield
 
+app = FastAPI(lifespan=lifespan)
 
-@app.post("/create-post")
-def create_post(post: PostCreate):
-    new_post = {"title": post.title, "content": post.content, "id": len(posts) + 1}
-    posts[max(posts.keys()) + 1] = new_post
-    return new_post
+@app.post("/upload")
+async def upload_file(
+    file: UploadFile = File(...),
+    caption: str = Form(""),
+    session: AsyncSession = Depends(get_async_session) # dependency injection, it tells fastapi to inject the session object into the function so that it can be used inside the function, which is access to the database
+):
+    post = Post(
+        caption= caption,
+        url= "dummy_url",
+        file_type= "dummy_photo",
+        file_name= "dummy_name"
+    )
 
+    session.add(post) # add the post object to the session
+    await session.commit() # commit the session to the database so that the post object is actually added to the database
+    await session.refresh(post) # refresh the post object so that the id and other attributes are added to the post object
+    return post # return the post object
 
-# @app.post("/posts")
-# def create_post(post: dict):
-#     post_id = len(posts) + 1
-#     post["id"] = post_id
-#     posts[post_id] = post
-#     return posts[post_id]
+@app.get("/feed")
+async def get_feed(
+    session: AsyncSession = Depends(get_async_session)
+):
+    result = await session.execute(select(Post).order_by(Post.created_at.desc()))
+    posts = [row[0] for row in result.all()]
 
+    posts_data = []
+    for post in posts:
+        posts_data.append({
+            "id": str(post.id),
+            "caption": post.caption,
+            "url": post.url,
+            "file_type": post.file_type,
+            "file_name": post.file_name,
+            "created_at": post.created_at.isoformat()
+        })
 
-# request with query parameters
-# @app.get("/query/posts?limit={limit}") # this will not work as {} are used to define patha parameters not query parameters
-@app.get("/query/posts")
-def get_posts_by_query(limit: int):
-    return {"posts": list(posts.items())[:limit]}
-# @app.get("/query/posts?limit={limit}")
-# def get_post_by_query(limit: int):
-#     return {"posts": posts[:limit]}
-
-@app.get("/posts/${id}")
-def get_post(id: int):
-    if id not in posts:
-        raise HTTPException(status_code=404, detail="Post is not found!")
-        # return {"message": "Post is not found!"}
-    
-    return posts.get(id)
-    # return {"post": posts[id]} # this is another way
-
-@app.get("/posts")
-def get_all_posts(limit: int = None):
-    if limit:
-        # return {"posts": posts[:limit]}
-        # print(posts[0:limit])
-        # return posts[0:limit]
-        # print(limit, list(posts.items())[:limit])
-        # return {"msg": "trying"}
-        return {"posts": list(posts.items())[:limit]}
-    
-    return {"posts": posts}
-
-# this is a much better typed version where return response is also typed for fastapi docs
-@app.get("/posts-v2")
-def get_all_posts_v2(limit: int = None) -> Dict[str, List]:
-    if limit:
-        posts_list = list(posts.items())[:limit]
-    else:
-        posts_list = list(posts.items())
-    
-    return {"posts": posts_list}
-
-# @app.get("/posts-v2")
-# def get_all_posts_v2(limit: int = None) -> List[PostResponse]:
-#     if limit:
-#         posts_list = list(posts.items())[:limit]
-#     else:
-#         posts_list = posts.items()
-    
-#     return [{"id": post["id"], "title": post["title"], "content": post["content"]} for post in posts_list]
-        # return {"posts": list(posts.items())[:limit]}
-    # return {"posts": posts}
-    # return {"posts": list(posts.items())}
-    return list(posts.items())
-
-@app.get("/hello-world")
-def hello_world():
-    return {"message": "Hello World"}
+    return {"posts": posts_data}
