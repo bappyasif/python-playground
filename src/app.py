@@ -1,21 +1,41 @@
 from fastapi import FastAPI
 from src.models import ProductCrude, Product, PatchProduct
+from src.db import SessionLocal, engine
+import src.db_models
 
 server = FastAPI()
+
+src.db_models.Base.metadata.create_all(bind=engine)
 
 @server.get("/")
 async def root():
     return {"message": "Hello World"}
 
 products = [
-    ProductCrude(1, "budget gadget", "This is a budget gadget", 19.99, 10),
+    # ProductCrude(1, "budget gadget", "This is a budget gadget", 19.99, 10),
     Product(id=2, name="Wireles Mouse", description="This is a wireless mouse", price=9.99, quantity=10),
     Product(id=3, name="Wireles Keyboard", description="This is a wireless keyboard", price=9.99, quantity=10),
     Product(id=4, name="Wireles Headset", description="This is a wireless headset", price=9.99, quantity=10)
 ]
 
+def db_init():
+    db = SessionLocal()
+
+    count = db.query(src.db_models.Product).count()
+
+    if count == 0:
+        for product in products:
+            # as we are making use of our existing pydantic product model for our local db we need to convert it to db model
+            db.add(src.db_models.Product(**product.model_dump())) # this will convert product to dict and then add it to db
+        db.commit()
+        db.close()
+
+db_init()
+
 @server.get("/products")
 def get_products():
+    # db = SessionLocal(),
+    # db.query()
     return {"message": "Products list", "products": products}
 
 @server.get("/products/{product_id}")

@@ -4,3 +4,53 @@
     * fastapi by default makes docs for your all available routes at [http://127.0.0.1:8000]/docs
     * another cool thing about that api docs is that we can directly test them from there without having to use any api client such as postman or thunder client or etc
     * another newer version of docs is [http://127.0.0.1:8000]/redoc
+
+<!-- to make use of database -->
+> to make use of rdbms we will need sqlalchemy and driber for your db(postgres or sql or oracle driver)
+
+> to create postgres db locally
+```
+sudo -u postgres psql -c "CREATE DATABASE lodb;"
+sudo -u postgres psql -c "CREATE USER myuser WITH PASSWORD '1234';"
+sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE mydatabase TO uname;"
+
+sudo -u postgres psql -c "\l"   # List databases
+sudo -u postgres psql -c "\du"  # List users   
+
+Fix:
+Connect as superuser (bypass password):
+sudo -u postgres psql
+
+Reset the password:
+ALTER USER uname WITH PASSWORD 'new_password';
+
+Exit:
+\q
+
+Connect with new password:
+psql -U uname -h localhost -d your_database
+
+
+To check which tables are created in a PostgreSQL database locally, connect using psql and run:
+
+\dt
+
+This lists all tables in the current database's public schema.
+
+For more details (like table size and description), use:
+
+\dt+
+
+To see tables in all schemas:
+
+\dt *.*
+
+
+To list all tables first (if unsure):
+
+\dt
+
+Then view data from any table:
+
+SELECT * FROM your_table_name;
+`
