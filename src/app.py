@@ -1,9 +1,18 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from src.models import ProductCrude, Product, PatchProduct
 from src.db import SessionLocal, engine
 import src.db_models
+from sqlalchemy.orm import Session
 
 server = FastAPI()
+
+server.add_middleware(
+    CORSMiddleware,
+    allow_origins=["localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+)
 
 src.db_models.Base.metadata.create_all(bind=engine)
 
@@ -17,6 +26,15 @@ products = [
     Product(id=3, name="Wireles Keyboard", description="This is a wireless keyboard", price=9.99, quantity=10),
     Product(id=4, name="Wireles Headset", description="This is a wireless headset", price=9.99, quantity=10)
 ]
+
+# getting database session
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 
 def db_init():
     db = SessionLocal()
@@ -38,18 +56,51 @@ def get_products():
     # db.query()
     return {"message": "Products list", "products": products}
 
+@server.get("/db-products")
+def get_products_from_db(
+    db: Session = Depends(get_db) # dependency injection
+):
+    # db = SessionLocal(), # we dont have to do this anymore as we are using dependency injection
+
+    db_products = db.query(src.db_models.Product).all()
+    
+    return {"message": "Products list!!", "products": db_products}
+
+@server.get("/db-products/{product_id}")
+def get_product_from_db(product_id: int, db: Session = Depends(get_db)):
+    db_product = db.query(src.db_models.Product).filter(src.db_models.Product.id == product_id).first()
+
+    if db_product:
+        return {"message": "DB_Product found", "product": db_product}
+    else:
+        return {"message": "Product not found"}
+
 @server.get("/products/{product_id}")
 def get_product(product_id: int):
     for product in products:
         if product.id == product_id:
             return {"message": "Product found", "product": product}
     return {"message": "Product not found"}
+    
 
 # this method doesnt nsure product id is unique or not
 # @server.post("/products")
 # def create_product(product: Product):
 #     products.append(product)
 #     return {"message": "Product created", "product": product}
+
+@server.post("/db-products")
+def create_product_in_db(product: Product, db: Session = Depends(get_db)):
+    db_products = db.query(src.db_models.Product).all()
+    for p in db_products:
+        if p.id == product.id:
+            return {"message": "Product already exists"}
+    
+    db.add(src.db_models.Product(**product.model_dump()))
+    db.commit()
+    # db.close()
+
+    return {"message": "Product created in db", "product": product}
  
 @server.post("/products")
 def create_product(product: Product):
@@ -66,6 +117,23 @@ def create_product(product: Product):
     
     products.append(product)
     return {"message": "Product created", "product": product}
+
+@server.put("/db-products/{product_id}")
+def update_db_product_as_its_entirity(product: Product, db: Session = Depends(get_db)):
+    db_product = db.query(src.db_models.Product).filter(src.db_models.Product.id == product.id).first()
+
+    if not db_product:
+        return {"message": "Product not found"}
+    
+    db_product.name = product.name
+    db_product.description = product.description
+    db_product.price = product.price
+    db_product.quantity = product.quantity
+
+    db.commit()
+    # db.close()
+
+    return {"message": "Product updated in db", "product": product}
 
 @server.put("/products/{product_id}")
 def update_product_as_entirity(product: Product):
@@ -104,6 +172,18 @@ def update_product_as_partial(product_update: PatchProduct):
             return {"message": "Product updated", "product": p}
         
     return {"message": "Product not found"}
+
+@server.delete("/db-products/{product_id}")
+def delete_product_from_db(product_id: int, db: Session = Depends(get_db)):
+    db_product = db.query(src.db_models.Product).filter(src.db_models.Product.id == product_id).first()
+
+    if db_product:
+        db.delete(db_product)
+        db.commit()
+        # db.close()
+        return {"message": "Product deleted"}
+    else:
+        return {"message": "Product not found"}
 
 # @server.delete("/products/{product_id}")
 @server.delete("/products/{product_id}")
