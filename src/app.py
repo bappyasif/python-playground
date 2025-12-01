@@ -1,9 +1,13 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from src.models import ProductCrude, Product, PatchProduct
 from src.db import SessionLocal, engine
 import src.db_models
 from sqlalchemy.orm import Session
+# from src.db_models import users
+from src.schemas import UserCreate, UserLogin
+# from passlib.context import CryptContext
+from bcrypt import hashpw, gensalt, checkpw
 
 server = FastAPI()
 
@@ -15,6 +19,9 @@ server.add_middleware(
 )
 
 src.db_models.Base.metadata.create_all(bind=engine)
+
+# pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# pwd_context = CryptContext(schemes=["bcrypt_sha256"], deprecated="auto")
 
 @server.get("/")
 async def root():
@@ -49,6 +56,156 @@ def db_init():
         db.close()
 
 db_init()
+
+# @server.on_event("startup")
+# async def startup_event():
+#     db_init()
+
+# @server.on_event("shutdown")
+# async def shutdown_event():
+#     db = SessionLocal()
+#     db.close()
+
+# @server.post("/register", response_model=UserCreate)
+# @server.post("/register")
+# def register_user(user: UserCreate, db: Session = Depends(get_db)):
+#     query = db.query(src.db_models.User).filter(src.db_models.User.username == user.username).first()
+
+#     # pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+#     if query:
+#         return {"message": "User already exists"}
+#     else:
+#         # hashed_password = pwd_context.hash(user.password)
+#         hashed_password = pwd_context.hash(user.password[:20])    # this will hash only first 72 characters, unsafe but still getting password has more than 72 characters
+#         # new_user = users(username=user.username, password=hashed_password)
+#         new_user = src.db_models.User(username=user.username, password=hashed_password)
+#         db.add(new_user)
+#         db.commit()
+#         db.refresh(new_user)
+#         return {"message": "User created", "user": new_user}
+
+# this is functioning properly
+# @server.post("/register")
+# def register_user(user: UserCreate, db: Session = Depends(get_db)):
+#     query = db.query(src.db_models.User).filter(src.db_models.User.username == user.username).first()
+
+#     if query:
+#         return {"message": "User already exists"}
+#     else:
+#         salt = gensalt()
+#         hashed_password = hashpw(user.password.encode('utf-8'), salt)
+
+#         # transform bytes to string
+#         hashed_password = hashed_password.decode('utf-8') # without this conversion it will throw error as bytes object is not verifyable against string
+
+#         # when we dont have to manually include user schema based data into db
+#         # new_user = src.db_models.User(**user.model_dump())
+#         new_user = src.db_models.User(username=user.username, password=hashed_password)
+#         db.add(new_user)
+#         db.commit()
+#         db.refresh(new_user)
+#         return {"message": "User created", "user": new_user, "hashed_password": hashed_password, "salt": salt}
+
+@server.post("/register")
+def register_user(user: UserCreate, db: Session = Depends(get_db)):
+    query = db.query(src.db_models.User).filter(src.db_models.User.username == user.username).first()
+
+    if query:
+        return {"message": "User already exists"}
+    else:
+        salt = gensalt()
+        hashed_password = hashpw(user.password.encode('utf-8'), salt)
+
+        # transform bytes to string
+        hashed_password = hashed_password.decode('utf-8') # without this conversion it will throw error as bytes object is not verifyable against string
+
+        new_user = src.db_models.User(username=user.username, password=hashed_password)
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+        return {"message": "User created", "user": new_user, "hashed_password": hashed_password, "salt": salt}
+    
+@server.post("/register-uwoh")
+def register_user_without_hashing(user: UserCreate, db: Session = Depends(get_db)):
+    query = db.query(src.db_models.User).filter(src.db_models.User.username == user.username).first()
+
+    if query:
+        return {"message": "User already exists"}
+    else:
+        new_user = src.db_models.User(**user.model_dump())
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+        return {"message": "User created", "user": new_user}
+    
+@server.post("/login-uwoh")
+async def user_login_witout_hashing(user: UserLogin, db: Session = Depends(get_db)):
+    query = db.query(src.db_models.User).filter(src.db_models.User.username == user.username).first()
+
+    if query:
+        if query.password == user.password:
+            return {"message": "Login successful"}
+        else:
+            return {"message": "Incorrect password"}
+    else:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+def verify_password(password: str, hashed_password: str) -> bool:
+    return checkpw(password.encode(), hashed_password.encode())
+    
+@server.post("/login")
+async def user_login(user: UserLogin, db: Session = Depends(get_db)):
+    query = db.query(src.db_models.User).filter(src.db_models.User.username == user.username).first()
+
+    if query:
+        if verify_password(user.password, query.password):
+            return {"message": "Login successful"}
+        else:
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+    else:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+# @server.post("/register-user")
+# async def user_registration(user: UserCreate, db: Session = Depends(get_db)):
+#     query = users.select().where(users.c.username == user.username)
+#     existing_user = db.execute(query).fetchone()
+
+#     if existing_user:
+#         raise HTTPException(status_code=400, detail="User already exists")
+#     else:
+#         hashed_password = pwd_context.hash(user.password)
+#         new_user = users.insert().values(username=user.username, password=hashed_password)
+#         await db.execute(new_user)
+#         db.commit()
+#         return {"message": "User created"}
+
+
+# @server.post("/login")
+# async def user_login(user: UserLogin, db: Session = Depends(get_db)):
+#     query = users.select().where(users.c.username == user.username)
+#     existing_user = db.execute(query).fetchone()
+
+#     if existing_user:
+#         if pwd_context.verify(user.password, existing_user.password):
+#             return {"message": "Login successful"}
+#         else:
+#             raise HTTPException(status_code=401, detail="Invalid credentials")
+#     else:
+#         raise HTTPException(status_code=404, detail="User not found")
+
+# @server.post("/login")
+# def user_login(user: UserLogin, db: Session = Depends(get_db)):
+#     query = src.db_models.User.select().where(src.db_models.User.username == user.username)
+#     existing_user = db.execute(query).fetchone()
+
+#     if existing_user:
+#         if pwd_context.verify(user.password, existing_user.password):
+#             return {"message": "Login successful"}
+#         else:
+#             raise HTTPException(status_code=401, detail="Invalid credentials")
+#     else:
+#         raise HTTPException(status_code=404, detail="User not found")
 
 @server.get("/products")
 def get_products():
