@@ -8,8 +8,20 @@ from sqlalchemy.orm import Session
 from src.schemas import UserCreate, UserLogin
 # from passlib.context import CryptContext
 from bcrypt import hashpw, gensalt, checkpw
+from src.auth.user import register_user, user_login, user_login_without_hashing, register_user_without_hashing
+# from src.auth.user import *
+from src.utils.init import get_db
+# from contextlib import asynccontextmanager
 
 server = FastAPI()
+
+# we could look into this later on for more perspective
+# @asynccontextmanager
+# async def lifespan(app: FastAPI):
+#     await create_db_and_tables()
+#     yield
+
+# server = FastAPI(lifespan=lifespan)
 
 server.add_middleware(
     CORSMiddleware,
@@ -35,12 +47,12 @@ products = [
 ]
 
 # getting database session
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# def get_db():
+#     db = SessionLocal()
+#     try:
+#         yield db
+#     finally:
+#         db.close()
 
 
 def db_init():
@@ -107,65 +119,88 @@ db_init()
 #         db.refresh(new_user)
 #         return {"message": "User created", "user": new_user, "hashed_password": hashed_password, "salt": salt}
 
+# will be using include routes from user.py for auth specific routes
+# @server.post("/register", response_model=UserCreate) # wil throw error as im sending back more than what was required for debugging purpose
 @server.post("/register")
-def register_user(user: UserCreate, db: Session = Depends(get_db)):
-    query = db.query(src.db_models.User).filter(src.db_models.User.username == user.username).first()
+def register(user: UserCreate, db: Session = Depends(get_db)):
+    return register_user(user, db)
 
-    if query:
-        return {"message": "User already exists"}
-    else:
-        salt = gensalt()
-        hashed_password = hashpw(user.password.encode('utf-8'), salt)
-
-        # transform bytes to string
-        hashed_password = hashed_password.decode('utf-8') # without this conversion it will throw error as bytes object is not verifyable against string
-
-        new_user = src.db_models.User(username=user.username, password=hashed_password)
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
-        return {"message": "User created", "user": new_user, "hashed_password": hashed_password, "salt": salt}
-    
-@server.post("/register-uwoh")
-def register_user_without_hashing(user: UserCreate, db: Session = Depends(get_db)):
-    query = db.query(src.db_models.User).filter(src.db_models.User.username == user.username).first()
-
-    if query:
-        return {"message": "User already exists"}
-    else:
-        new_user = src.db_models.User(**user.model_dump())
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
-        return {"message": "User created", "user": new_user}
-    
-@server.post("/login-uwoh")
-async def user_login_witout_hashing(user: UserLogin, db: Session = Depends(get_db)):
-    query = db.query(src.db_models.User).filter(src.db_models.User.username == user.username).first()
-
-    if query:
-        if query.password == user.password:
-            return {"message": "Login successful"}
-        else:
-            return {"message": "Incorrect password"}
-    else:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-def verify_password(password: str, hashed_password: str) -> bool:
-    return checkpw(password.encode(), hashed_password.encode())
-    
 @server.post("/login")
-async def user_login(user: UserLogin, db: Session = Depends(get_db)):
-    query = db.query(src.db_models.User).filter(src.db_models.User.username == user.username).first()
+def login(user: UserLogin, db: Session = Depends(get_db)):
+    return user_login(user, db)
 
-    if query:
-        if verify_password(user.password, query.password):
-            return {"message": "Login successful"}
-        else:
-            raise HTTPException(status_code=401, detail="Invalid credentials")
-    else:
-        raise HTTPException(status_code=404, detail="User not found")
+@server.post("/login-uwoh")
+def login_uwoh(user: UserLogin, db: Session = Depends(get_db)):
+    return user_login_without_hashing(user, db)
+
+@server.post("/register-uwoh")
+def register_uwoh(user: UserLogin, db: Session = Depends(get_db)):
+    return register_user_without_hashing(user, db)
+
+
+# below is when using user aut specific routes all in same app script
+# @server.post("/register")
+# def register_user(user: UserCreate, db: Session = Depends(get_db)):
+#     query = db.query(src.db_models.User).filter(src.db_models.User.username == user.username).first()
+
+#     if query:
+#         return {"message": "User already exists"}
+#     else:
+#         salt = gensalt()
+#         hashed_password = hashpw(user.password.encode('utf-8'), salt)
+
+#         # transform bytes to string
+#         hashed_password = hashed_password.decode('utf-8') # without this conversion it will throw error as bytes object is not verifyable against string
+
+#         new_user = src.db_models.User(username=user.username, password=hashed_password)
+#         db.add(new_user)
+#         db.commit()
+#         db.refresh(new_user)
+#         return {"message": "User created", "user": new_user, "hashed_password": hashed_password, "salt": salt}
     
+# @server.post("/register-uwoh")
+# def register_user_without_hashing(user: UserCreate, db: Session = Depends(get_db)):
+#     query = db.query(src.db_models.User).filter(src.db_models.User.username == user.username).first()
+
+#     if query:
+#         return {"message": "User already exists"}
+#     else:
+#         new_user = src.db_models.User(**user.model_dump())
+#         db.add(new_user)
+#         db.commit()
+#         db.refresh(new_user)
+#         return {"message": "User created", "user": new_user}
+    
+# @server.post("/login-uwoh")
+# async def user_login_witout_hashing(user: UserLogin, db: Session = Depends(get_db)):
+#     query = db.query(src.db_models.User).filter(src.db_models.User.username == user.username).first()
+
+#     if query:
+#         if query.password == user.password:
+#             return {"message": "Login successful"}
+#         else:
+#             return {"message": "Incorrect password"}
+#     else:
+#         raise HTTPException(status_code=404, detail="User not found")
+    
+# def verify_password(password: str, hashed_password: str) -> bool:
+#     return checkpw(password.encode(), hashed_password.encode())
+    
+# @server.post("/login")
+# async def user_login(user: UserLogin, db: Session = Depends(get_db)):
+#     query = db.query(src.db_models.User).filter(src.db_models.User.username == user.username).first()
+
+#     if query:
+#         if verify_password(user.password, query.password):
+#             return {"message": "Login successful"}
+#         else:
+#             raise HTTPException(status_code=401, detail="Invalid credentials")
+#     else:
+#         raise HTTPException(status_code=404, detail="User not found")
+    
+
+
+
 # @server.post("/register-user")
 # async def user_registration(user: UserCreate, db: Session = Depends(get_db)):
 #     query = users.select().where(users.c.username == user.username)
