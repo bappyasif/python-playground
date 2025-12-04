@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine
-from sqlalchemy.exc import SQLAlchemyError
+# from sqlalchemy.exc import SQLAlchemyError
+# from sqlalchemy.orm import sessionmaker
 
 # Database configuration
 username = 'myuser'
@@ -10,6 +11,10 @@ database_name = 'localdb'
 
 # Create the engine
 engine = create_engine(f'postgresql://{username}:{password}@{host}:{port}/{database_name}')
+
+# Session = sessionmaker(bind=engine)
+# session = Session()
+
 
 # Check if the database exists
 # try:

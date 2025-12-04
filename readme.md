@@ -32,7 +32,7 @@ Exit:
 \q
 
 Connect with new password:
-psql -U uname -h localhost -d your_database
+psql -U your_user -h localhost -d your_database
 
 
 To check which tables are created in a PostgreSQL database locally, connect using psql and run:
@@ -57,4 +57,11 @@ To list all tables first (if unsure):
 Then view data from any table:
 
 SELECT * FROM your_table_name;
+
+2. Using psql
+Connect to PostgreSQL (pass: 1234) and drop the database:
+
+psql -U postgres -h localhost -c "DROP DATABASE IF EXISTS dbname;"
+
+Use IF EXISTS to avoid errors if the database doesn’t exist.
 `
