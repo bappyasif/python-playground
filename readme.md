@@ -12,11 +12,13 @@
 <!-- to make use of database -->
 > to make use of rdbms we will need sqlalchemy and driber for your db(postgres or sql or oracle driver)
 
+> postgresql doesnt create a database when not found in engine instance to be connected as like sqlite so we will have to do it manualy in local environment
+
 > to create postgres db locally
 ```
-sudo -u postgres psql -c "CREATE DATABASE lodb;"
+sudo -u postgres psql -c "CREATE DATABASE db_name;"
 sudo -u postgres psql -c "CREATE USER myuser WITH PASSWORD '1234';"
-sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE mydatabase TO uname;"
+sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE db_name TO myuser;"
 
 sudo -u postgres psql -c "\l"   # List databases
 sudo -u postgres psql -c "\du"  # List users   
