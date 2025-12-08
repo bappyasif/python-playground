@@ -5,6 +5,7 @@ from src.db.models import User
 from src.schemas.user import UserCreate, UserResponse, PatchUser
 from src.utils.db import get_db
 from src.crud.user import get_user, create_user, update_user, patch_user, delete_user
+from src.crud.authd_user import register_user, login_for_access_token
 
 server = FastAPI(title="FastApi with PostgreSQL Database")
 
@@ -40,3 +41,12 @@ def delete_a_user(user_id: int, db: Session = Depends(get_db)):
 def get_all_users(db: Session = Depends(get_db)):
     users = db.query(User).all()
     return users
+
+# to run authd endpints
+@server.post("/auth/register", response_model=UserResponse)
+def register_user_endpoint(user: UserCreate, db: Session = Depends(get_db)):
+    return register_user(user, db)
+
+@server.post("/auth/login", response_model=dict)
+def login_user_endpoint(user: UserCreate, db: Session = Depends(get_db)):
+    return login_for_access_token(user.email, user.password, db)
