@@ -16,4 +16,4 @@ class User(Base):
     is_active = Column(Boolean, default=True)
 
 # now we need to create communication protocol between our db model and db
-Base.metadata.create_all(bind=engine) # create the tables in the database
+# Base.metadata.create_all(bind=engine) # create the tables in the database

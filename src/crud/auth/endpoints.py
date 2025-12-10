@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from src.utils.db import get_db
 from src.models.db_tables import User
 from src.models.api_schemas import UserCreate
-from src.crud.auth.dependecies import get_current_active_user
+from src.crud.auth.dependencies import get_current_active_user
 from src.utils.auth import get_password_hash, verify_password, create_access_token
 from datetime import timedelta
 from fastapi.security import OAuth2PasswordRequestForm
