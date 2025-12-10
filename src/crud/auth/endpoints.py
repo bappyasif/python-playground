@@ -1,0 +1,68 @@
+from fastapi import Depends, HTTPException
+from sqlalchemy.orm import Session
+from src.utils.db import get_db
+from src.models.db_tables import User
+from src.models.api_schemas import UserCreate
+from src.crud.auth.dependecies import get_current_active_user
+from src.utils.auth import get_password_hash, verify_password, create_access_token
+from datetime import timedelta
+from fastapi.security import OAuth2PasswordRequestForm
+from src.configs.jwt import ACCESS_TOKEN_EXPIRE_MINUTES
+
+def register_user(user: UserCreate, db: Session = Depends(get_db)):
+    # Check if user with the same email already exists
+    existing_user = db.query(User).filter(User.email == user.email).first()
+    
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Hash the password before storing it
+    hashed_password = get_password_hash(user.password)
+    
+    new_user = User(
+        name=user.name,
+        email=user.email,
+        role=user.role,
+        hashed_password=hashed_password,
+        is_active=True
+    )
+    
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    
+    return new_user
+
+def login_user(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == form_data.username).first()
+    if not user:
+        raise HTTPException(status_code=400, detail="Incorrect email or password")
+    if not user.is_active:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    
+    # Verify the password
+    if not verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(status_code=404, detail="Incorrect email or password")
+    
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+
+    access_token = create_access_token(
+        data={"sub": user.email}, expires_delta=access_token_expires
+    )
+    
+    return {"access_token": access_token, "token_type": "bearer"}
+
+def get_profile(current_user: User = Depends(get_current_active_user)):
+    return current_user
+
+def verify_token(current_user: User = Depends(get_current_active_user)):
+    return {
+        "valid": True,
+        "user": {
+            "id": current_user.id,
+            "name": current_user.name,
+            "email": current_user.email,
+            "role": current_user.role,
+            "is_active": current_user.is_active
+        }
+    }
