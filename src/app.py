@@ -51,8 +51,8 @@ def get_a_user(user_id: int, current_user: User = Depends(get_current_active_use
     return get_user(user_id, current_user, db)
 
 @server.post("/users/", response_model=UserResponse)
-def create_a_user(user_id: int, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
-    return create_user(user_id, current_user, db)   
+def create_a_user(user: UserCreate, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
+    return create_user(user, current_user, db)   
 
 @server.put("/users/{user_id}", response_model=UserResponse)
 def update_a_user(user_id: int, user: UserCreate, current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
