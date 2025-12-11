@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from src.utils.db import get_db
 from src.models.db_tables import User
 from src.models.api_schemas import UserCreate, UserResponse, PatchUser
-from src.crud.auth.dependecies import get_current_active_user
+from src.crud.auth.dependencies import get_current_active_user
 from src.utils.auth import get_password_hash
 
 def users_list(current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
