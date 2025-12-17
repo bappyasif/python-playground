@@ -6,10 +6,12 @@ from src.models.db import User
 
 from src.models.api import UserResponse, CreateUserRequest
 
+from src.crud.auth.dependencies import get_current_active_user
+
 user_router = APIRouter(prefix="/user", tags=["user"])
 
 @user_router.get("/all", response_model=list[UserResponse])
-async def get_all_users(db=Depends(get_db)):
+async def get_all_users(current_user: User = Depends(get_current_active_user), db=Depends(get_db)):
     print(db)
     users = db.query(User).all()
     # return {
@@ -26,7 +28,7 @@ async def get_current_user():
     }
 
 @user_router.get("/specific/{user_id}", response_model=UserResponse)
-async def specefic_user(user_id: int, db=Depends(get_db)):
+async def specefic_user(user_id: int, current_user: User = Depends(get_current_active_user), db=Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
 
     if not user:
@@ -39,20 +41,20 @@ async def specefic_user(user_id: int, db=Depends(get_db)):
 
     return user
 
-@user_router.post("/new", response_model=UserResponse)
-async def create_user(user: CreateUserRequest, db=Depends(get_db)):
-    existing_user = db.query(User).filter(User.email == user.email).first()
+# @user_router.post("/new", response_model=UserResponse)
+# async def create_user(user: CreateUserRequest, db=Depends(get_db)):
+#     existing_user = db.query(User).filter(User.email == user.email).first()
 
-    if existing_user:
-        raise HTTPException(status_code=400, detail="Username already exists")
+#     if existing_user:
+#         raise HTTPException(status_code=400, detail="Username already exists")
     
-    new_user = User(name=user.name, email=user.email, password=user.password)
+#     new_user = User(name=user.name, email=user.email, password=user.password)
     
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+#     db.add(new_user)
+#     db.commit()
+#     db.refresh(new_user)
 
-    return new_user
+#     return new_user
     
     # return {
     #     "message": "new user created",
@@ -60,7 +62,7 @@ async def create_user(user: CreateUserRequest, db=Depends(get_db)):
     # }
 
 @user_router.put("/update/{user_id}", response_model=UserResponse)
-async def update_user(user_id: int, user: CreateUserRequest, db=Depends(get_db)):
+async def update_user(user_id: int, user: CreateUserRequest, current_user: User = Depends(get_current_active_user), db=Depends(get_db)):
     existing_user = db.query(User).filter(User.id == user_id).first()
 
     if not existing_user:
@@ -79,7 +81,7 @@ async def update_user(user_id: int, user: CreateUserRequest, db=Depends(get_db))
     }
 
 @user_router.delete("/delete/{user_id}")
-async def delete_user(user_id: int, db=Depends(get_db)):
+async def delete_user(user_id: int, current_user: User = Depends(get_current_active_user), db=Depends(get_db)):
     existing_user = db.query(User).filter(User.id == user_id).first()
 
     if not existing_user:
