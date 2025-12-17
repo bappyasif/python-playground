@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 class CreateUserRequest(BaseModel):
     name: str
@@ -21,4 +22,10 @@ class LoginRequest(BaseModel):
 
 class LoginResponse(BaseModel):
     username: str
+    token: str
+
+class AuthdTokenRequest(BaseModel):
+    email: Optional[str] = None
+
+class AuthdTokenResponse(BaseModel):
     token: str
