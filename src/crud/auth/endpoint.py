@@ -12,7 +12,7 @@ from src.models.db import User
 auth_token_router = APIRouter(tags=["auth-token"])
 
 @auth_token_router.post("/token")
-async def login_user(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+async def authorize_user_Oauth2_Form(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == form_data.username).first()
 
     if not user:
