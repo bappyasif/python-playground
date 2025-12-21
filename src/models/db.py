@@ -12,11 +12,3 @@ class User(Base):
     password = Column(String)
     is_active = Column(Boolean, default=True)
     token = Column(String, unique=True, index=True)
-
-
-# class AuthdUser(User):
-#     __tablename__ = "authd_users"
-
-#     token = Column(String, unique=True, index=True)
-#     # refresh_token = Column(String, unique=True, index=True)
-#     isActiveUser = Column(Boolean, default=True)

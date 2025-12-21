@@ -9,8 +9,6 @@ server = FastAPI()
 server.include_router(user_router, prefix="/api/v1")
 
 server.include_router(auth_router, prefix="/api/v1")
-# server.include_router(auth_router) # seems like prefix would require more configs to let authorize popoup to work!!
-# server.include_router(auth_router, prefix="/api/v1/user-auth")
 
 # when using "Authorize" its trying to locate "/token" endpoint using prefix makes it harder or unfindable, so kept it in a separate router to keep it special and distinct for understanding
 server.include_router(auth_token_router)
@@ -22,10 +20,6 @@ def on_start(func):
         create_tables()
         func()
     return wrapper
-
-# this wont work as decorator function expects a function as a parameter
-# def on_start():
-#     create_tables() 
 
 # Apply the decorator to the FastAPI route or other initialization code
 @server.get("/")

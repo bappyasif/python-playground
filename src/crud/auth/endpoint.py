@@ -27,7 +27,6 @@ async def authorize_user_Oauth2_Form(form_data: OAuth2PasswordRequestForm = Depe
     
     access_token = create_jwt_access_token(
         data={"sub": user.email},
-        # expires_delta=int(timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES)))
         expires_delta=timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))
     )
     

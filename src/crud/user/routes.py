@@ -14,10 +14,6 @@ user_router = APIRouter(prefix="/user", tags=["user"])
 async def get_all_users(current_user: User = Depends(get_current_active_user), db=Depends(get_db)):
     print(db)
     users = db.query(User).all()
-    # return {
-    #     "message": "list of all users",
-    #     "users": users
-    # }
 
     return users
 
@@ -33,33 +29,8 @@ async def specefic_user(user_id: int, current_user: User = Depends(get_current_a
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    
-    # return {
-    #     "message": "specific user",
-    #     "user": user
-    # }
 
     return user
-
-# @user_router.post("/new", response_model=UserResponse)
-# async def create_user(user: CreateUserRequest, db=Depends(get_db)):
-#     existing_user = db.query(User).filter(User.email == user.email).first()
-
-#     if existing_user:
-#         raise HTTPException(status_code=400, detail="Username already exists")
-    
-#     new_user = User(name=user.name, email=user.email, password=user.password)
-    
-#     db.add(new_user)
-#     db.commit()
-#     db.refresh(new_user)
-
-#     return new_user
-    
-    # return {
-    #     "message": "new user created",
-    #     "user": new_user
-    # }
 
 @user_router.put("/update/{user_id}", response_model=UserResponse)
 async def update_user(user_id: int, user: CreateUserRequest, current_user: User = Depends(get_current_active_user), db=Depends(get_db)):
@@ -70,7 +41,6 @@ async def update_user(user_id: int, user: CreateUserRequest, current_user: User 
     
     existing_user.name = user.name
     existing_user.email = user.email
-    # existing_user.password = user.password
     
     db.commit()
     db.refresh(existing_user)

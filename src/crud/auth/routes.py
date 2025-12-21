@@ -5,11 +5,10 @@ from src.utils.db import get_db
 from src.utils.jwt import get_password_hashed, verify_password, create_jwt_access_token
 from src.crud.auth.dependencies import get_current_active_user
 from sqlalchemy.orm import Session
-# from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
 from src.configs.jwt import ACCESS_TOKEN_EXPIRE_MINUTES
 from src.models.api import LoginRequest
-# auth_router = APIRouter(prefix="/user-auth", tags=["user-auth"])
+
 auth_router = APIRouter(tags=["user-auth"])
 
 @auth_router.post("/register")
@@ -35,7 +34,6 @@ async def register_user(user: CreateUserRequest, db: Session = Depends(get_db)):
         "user": new_user
     }
 
-# @auth_router.post("/token") # moved to its own router "endpoint.py"
 @auth_router.post("/login")
 async def login_user(form_data: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == form_data.username).first()
@@ -52,7 +50,6 @@ async def login_user(form_data: LoginRequest, db: Session = Depends(get_db)):
     
     access_token = create_jwt_access_token(
         data={"sub": user.email},
-        # expires_delta=int(timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES)))
         expires_delta=timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))
     )
     
@@ -62,7 +59,6 @@ async def login_user(form_data: LoginRequest, db: Session = Depends(get_db)):
         "token_type": "bearer"
     }
 
-# @auth_router.post("/token")
 @auth_router.post("/verify-token")
 def verify_token(current_user: User = Depends(get_current_active_user)):
     return {
@@ -71,7 +67,6 @@ def verify_token(current_user: User = Depends(get_current_active_user)):
             "id": current_user.id,
             "name": current_user.name,
             "email": current_user.email,
-            # "role": current_user.role,
             "is_active": current_user.is_active
         }
     }
