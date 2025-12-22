@@ -9,3 +9,7 @@ passlib
 python-multipart
 
 dotenv
+
+transformers
+# langchain
+# langchain-huggingface

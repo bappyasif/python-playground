@@ -67,3 +67,18 @@ psql -U postgres -h localhost -c "DROP DATABASE IF EXISTS dbname;"
 
 Use IF EXISTS to avoid errors if the database doesn’t exist.
 `
+
+#installing packages using requirements.txt file : `pip install -r requirements.txt`
+
+
+# huggingface
+
+* create access token in huggingface and copy token
+* use cli from virtual environment and use `huggingface-cli login` and then paste token copied from huggingface profile dashboard
+* for safekeeping store it in environemnt variables as well
+
+* to find a model in huggingface: models => libraries [select transformers] => tasks => and now select your model shown in right panel
+
+# py torch
+this would only instal cpu specific pytorch and not gpu specefic bloated pytorch
+> `pip install torch==1.10.0+cpu torchvision==0.11.1+cpu torchaudio===0.10.0+cpu -f https://download.pytorch.org/whl/torch_stable.html`
