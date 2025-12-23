@@ -10,6 +10,7 @@ python-multipart
 
 dotenv
 
-transformers
+huggingface_hub
+# transformers
 # langchain
 # langchain-huggingface
