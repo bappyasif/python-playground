@@ -93,3 +93,8 @@
 # pip install fastapi uvicorn onnxruntime tokenizers
 # Total size: ~200MB (instead of the 2GB+ required for Torch).
 # These resources offer guides for converting models to ONNX format using cloud-based tools like Hugging Face Spaces or Google Colab:
+
+
+# after using huggingface export space and google colab for model conversion, next step is ready to be implemented
+
+# after doodling around with this demo gpt2 openai dataset we'll move on to our next model - distilbert or similar for text summarization or genefration in similar way
