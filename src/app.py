@@ -5,7 +5,8 @@ from src.crud.auth.endpoint import auth_token_router
 from src.huggingface.inference import hfi_router
 from src.utils.db import create_tables
 # from src.huggingface.hf_hub import hf_hub_download
-import src.huggingface.hf_req
+# import src.huggingface.hf_req
+from src.crud.genai.routes import genai_router
 
 server = FastAPI()
 
@@ -18,6 +19,7 @@ server.include_router(auth_token_router)
 
 server.include_router(hfi_router, prefix="/api/v1")
 
+server.include_router(genai_router, prefix="/api/v1")
 
 # Define a decorator to call create_tables when the server starts
 def on_start(func):

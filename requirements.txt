@@ -14,3 +14,4 @@ huggingface_hub
 # transformers
 # langchain
 # langchain-huggingface
+google-genai
