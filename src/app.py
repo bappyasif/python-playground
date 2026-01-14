@@ -6,6 +6,8 @@ from src.huggingface.inference import hfi_router
 from src.utils.db import create_tables
 # from src.huggingface.hf_hub import hf_hub_download
 # import src.huggingface.hf_req
+import src.huggingface.hf_hub_try_II 
+import src.huggingface.hf_hub
 from src.crud.genai.routes import genai_router
 
 server = FastAPI()

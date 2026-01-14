@@ -14,12 +14,12 @@ onnx_dir = "./onnx"
 tokenizer_dir = "./tokenizer"
 
 # Download the ONNX model
-hf_hub_download(
-    repo_id=repository_id,
-    # filename=onnx_filename,
-    local_dir=onnx_dir,
-    # recursive=True # to download entire folder if needed, but herte its says unexpected argument "recursive"!!
-)
+# hf_hub_download(
+#     repo_id=repository_id,
+#     # filename=onnx_filename,
+#     local_dir=onnx_dir,
+#     # recursive=True # to download entire folder if needed, but herte its says unexpected argument "recursive"!!
+# )
 
 # Download the tokenizer
 hf_hub_download(

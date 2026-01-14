@@ -1,4 +1,5 @@
 import requests
+import os
 
 def download_files_from_repository(repository_url: str, output_dir: str) -> None:
     """
@@ -12,6 +13,7 @@ def download_files_from_repository(repository_url: str, output_dir: str) -> None
         None
     """
     response = requests.get(repository_url)
+    print(response.text)
     if response.status_code == 200:
         content_type = response.headers.get("content-type")
         if content_type == "application/json":
