@@ -9,6 +9,7 @@ from src.utils.db import create_tables
 import src.huggingface.hf_hub_try_II 
 import src.huggingface.hf_hub
 from src.crud.genai.routes import genai_router
+from src.crud.hf.routes import hf_router
 
 server = FastAPI()
 
@@ -22,6 +23,8 @@ server.include_router(auth_token_router)
 server.include_router(hfi_router, prefix="/api/v1")
 
 server.include_router(genai_router, prefix="/api/v1")
+
+server.include_router(hf_router, prefix="/api/v1")
 
 # Define a decorator to call create_tables when the server starts
 def on_start(func):
