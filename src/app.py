@@ -11,7 +11,18 @@ import src.huggingface.hf_hub
 from src.crud.genai.routes import genai_router
 from src.crud.hf.routes import hf_router
 
+# lets add allowed origins for CORS
+from fastapi.middleware.cors import CORSMiddleware
+
 server = FastAPI()
+
+server.add_middleware(
+    CORSMiddleware,
+    allow_origins=["/localhost", "http://localhost:3000", "http://localhost:8000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 server.include_router(user_router, prefix="/api/v1")
 
