@@ -31,6 +31,7 @@ async def genai_inference(user_input: dict[str, str]):
         - strengths: List the strengths of the hobby.
         - areas_for_improvement: List specific areas where the hobby can be improved.
         - actionable_steps: Provide clear and actionable steps to enhance the hobby.
+        actions: provide specific actions of about 2 to 6 taken from actionable_steps and repurpose it in an array with each object containing an id, title, time with am/pm time format, and a completed boolean value in them
         - examples: Provide examples of how to use the hobby effectively.
         Hobby Description: {description}
         Hobby Name: {hobby}
