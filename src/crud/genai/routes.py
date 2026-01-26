@@ -32,8 +32,8 @@ async def genai_inference(user_input: dict[str, str]):
         - areas_for_improvement: List specific areas where the hobby can be improved.
         - actionable_steps: Provide clear and actionable steps to enhance the hobby.
         - actions_legacy: provide specific actions of about 2 to 6 taken from actionable_steps and repurpose it in an array with each object containing an id, title, time with am/pm time format, and a completed boolean value in them
-        - actions: Provide a clear and concise instruction as its in example of how to use the hobby effectively. about 2 to 6 taken from actionable_steps and repurpose it in an array with each object containing an id, title, time with am/pm time format, and a completed boolean value in them. it would be on daily basis.
         - examples: Provide examples of how to use the hobby effectively.
+        - actions: Provide a clear and concise instruction as its in example of how to use the hobby effectively RATHER THAN HOW IT SHOULD HAVE BEEN. about 2 to 6 taken from actionable_steps and repurpose it in an array with each object containing an id, title, time with am/pm time format, and a completed boolean value in them. it would be on daily basis.
         Hobby Description: {description}
         Hobby Name: {hobby}
         Feedback: {feedback}
