@@ -14,6 +14,28 @@ async def genai_health_check():
         return {"status": "genai router is unhealthy", "error": str(e)}
     # return {"status": "genai router is healthy"}
 
+@genai_router.post("/weekly-summary")
+async def genai_weekly_summary(user_input: dict[str, str]):
+    hobby = user_input.get("hobby")
+    description = user_input.get("description")
+    feedback = user_input.get("feedback")
+    try:
+        # lets write a weekly summarizing prompt that will return a json response back to user after gemini inference
+        prompt = f"""
+        You are an expert AI assistant that provides weekly summaries of hobbies.
+        Given the following hobby description, provide a weekly summary of the hobby.
+        Return the summary in JSON format with the following properties:
+        - sumamry: Provide a weekly summary of the hobby. use a short and concise manner
+        Hobby Description: {description}
+        Hobby Name: {hobby}
+        Feedback: {feedback}
+        """
+
+        raw_text = try_gemini_inference(prompt)
+
+    except Exception as e:
+        return {"status": "genai router is unhealthy", "error": str(e)}
+
 
 @genai_router.post("/inference")
 async def genai_inference(user_input: dict[str, str]):
